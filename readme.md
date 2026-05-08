@@ -1,16 +1,22 @@
+<div align="center">
+
+![Preview](Qml/assets/preview.png)
+
+![C++](https://img.shields.io/badge/C++-17/20-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
+![Qt](https://img.shields.io/badge/Qt-6-41CD52?style=for-the-badge&logo=qt&logoColor=white)
+![QML](https://img.shields.io/badge/QML-UI-41CD52?style=for-the-badge&logo=qt&logoColor=white)
+![ELM327](https://img.shields.io/badge/ELM327-Emulator-00B8FF?style=for-the-badge)
+![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-22C55E?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/iUnreallx/ELM327-Emulator?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/iUnreallx/ELM327-Emulator?style=for-the-badge)
+
+</div>
+
 # ELM327 Emulator
 
 > **ELM327 Emulator** is a lightweight open-source desktop tool for simulating ELM327 / OBD2 adapter responses without real vehicle hardware.
 
 It allows developers to test OBD2 dashboards, diagnostic tools, and serial communication logic in a controlled virtual environment.
-
-![Preview](Qml/assets/preview.png)
-
-![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
-![Qt](https://img.shields.io/badge/Qt-41CD52?style=for-the-badge&logo=qt&logoColor=white)
-![QML](https://img.shields.io/badge/QML-41CD52?style=for-the-badge&logo=qt&logoColor=white)
-![OBD2](https://img.shields.io/badge/OBD2-ELM327-blue?style=for-the-badge)
-![Open Source](https://img.shields.io/badge/Open%20Source-Yes-brightgreen?style=for-the-badge)
 
 ## About The Project
 
