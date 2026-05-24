@@ -23,16 +23,16 @@ qt_add_qml_module(Elm327-Emulator
         Qml/Main.qml
 
     SOURCES
-        Src/Source/SerialPortScanner.cpp
-        Src/Source/SerialPortConnector.cpp
-        Src/Source/SerialPortWorker.cpp
-        Src/Header/SerialPortScanner.h
-        Src/Header/SerialPortConnector.h
-        Src/Header/SerialPortWorker.h
-
+        src/Source/SerialPortScanner.cpp
+        src/Source/SerialPortConnector.cpp
+        src/Source/SerialPortWorker.cpp
+        src/Header/SerialPortScanner.h
+        src/Header/SerialPortConnector.h
+        src/Header/SerialPortWorker.h
+        src/core/interfaces/ITransport.h
     RESOURCES
-        Qml/assets/fonts/Ubuntu-Bold.ttf
-        Qml/assets/fonts/Ubuntu-Regular.ttf
+        qml/assets/fonts/Ubuntu-Bold.ttf
+        qml/assets/fonts/Ubuntu-Regular.ttf
         readme.md
         .gitignore
 )
