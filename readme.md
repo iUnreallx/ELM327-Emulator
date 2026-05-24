@@ -1,3 +1,4 @@
+<a id="readme"></a>
 <div align="center">
 
 ![Preview](Qml/assets/preview.png)
@@ -196,11 +197,11 @@ git push origin feature/my-feature
 
 ## License
 
-This project is open-source.  
-See the `LICENSE` file for details.
+The project is distributed under the MIT license. See the [LICENSE](LICENSE) file for details.
 
 ## Contact
 
 GitHub: [@iUnreallx](https://github.com/iUnreallx)
 
 Project Link: [https://github.com/iUnreallx/ELM327-Emulator](https://github.com/iUnreallx/ELM327-Emulator)
+<p align="right">(<a href="#readme">back to top</a>)</p>
