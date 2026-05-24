@@ -26,11 +26,9 @@ qt_add_qml_module(Elm327-Emulator
         Src/Source/SerialPortScanner.cpp
         Src/Source/SerialPortConnector.cpp
         Src/Source/SerialPortWorker.cpp
-        Src/Source/logger/OBD_Logger.cpp
         Src/Header/SerialPortScanner.h
         Src/Header/SerialPortConnector.h
         Src/Header/SerialPortWorker.h
-        Src/Header/logger/OBD_Logger.h
 
     RESOURCES
         Qml/assets/fonts/Ubuntu-Bold.ttf
