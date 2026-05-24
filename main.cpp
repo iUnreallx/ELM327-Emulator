@@ -1,9 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <Src/Header/SerialPortScanner.h>
-#include <Src/Header/SerialPortConnector.h>
-
 
 int main(int argc, char *argv[])
 {
@@ -22,8 +19,6 @@ int main(int argc, char *argv[])
         Qt::QueuedConnection
     );
     engine.loadFromModule("Elm327-Emulator", "Main");
-
-
 
     return app.exec();
 }
