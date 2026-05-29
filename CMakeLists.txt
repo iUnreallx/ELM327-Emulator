@@ -25,8 +25,17 @@ qt_add_qml_module(Elm327-Emulator
     SOURCES
 
         src/core/interfaces/ITransport.h
+        src/core/pipeline/Router.cpp
+        src/core/pipeline/Router.h
+        src/core/state/ElmConfig.h
+        src/core/state/EcuState.h
+        src/core/ElmCore.cpp
+        src/core/ElmCore.h
+
         src/io/SerialTransport.cpp
         src/io/SerialTransport.h
+
+
 
     RESOURCES
         qml/assets/fonts/Ubuntu-Bold.ttf
