@@ -1,13 +1,12 @@
 #include "src/core/pipeline/Router.h"
+#include "Preprocessor.h"
 #include <QDebug>
 
 Router::Router() {}
 
 QByteArray Router::routeIncomingData(const QByteArray& rawData) {
 
-    /// devide this place to Preprocessor.h .cpp file
-    QString request = QString::fromUtf8(rawData).trimmed().toUpper();
-    request.replace(" ", "");
+    QString request = Preprocessor::cleanRequest(rawData);
 
     qDebug() << "получили запрос от транспорта: " << request;
 
