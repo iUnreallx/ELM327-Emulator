@@ -33,6 +33,3 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
     });
 }
 
-
-
-
