@@ -42,6 +42,10 @@ qt_add_qml_module(Elm327-Emulator
         qml/assets/fonts/Ubuntu-Regular.ttf
         readme.md
         .gitignore
+        SOURCES src/core/pipeline/Preprocessor.h
+        SOURCES src/core/pipeline/Preprocessor.cpp
+        SOURCES src/core/pipeline/Formatter.cpp
+        SOURCES src/core/pipeline/Formatter.h
 )
 
 set_target_properties(Elm327-Emulator PROPERTIES

@@ -22,7 +22,6 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
         }
     });
 
-
     m_transport->setConnectionCallback([this](bool isConnected) {
         if (isConnected) {
             qDebug() << "соединение установлено. эмуляция готова";
@@ -32,7 +31,4 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
         }
     });
 }
-
-
-
 
