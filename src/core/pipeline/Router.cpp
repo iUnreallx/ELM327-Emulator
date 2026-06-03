@@ -1,31 +1,35 @@
 #include "src/core/pipeline/Router.h"
 #include "Preprocessor.h"
+#include "Formatter.h"
 #include <QDebug>
 
 Router::Router() {}
 
 QByteArray Router::routeIncomingData(const QByteArray& rawData) {
-
+    /// логика приведения всей строки полученных байт к одному стилю
     QString request = Preprocessor::cleanRequest(rawData);
-
     qDebug() << "получили запрос от транспорта: " << request;
 
-    // bring out of the logick
+    // todotodotodotodo
+    QString nakedResponse = "";
     if (request.startsWith("AT")) {
-        qDebug() << "обработка at команды";
         if (request == "ATZ") {
-            return "ELM327 v1.5\r\n>";
+            nakedResponse = "ELM327 v1.5";
+        } else {
+            nakedResponse = "OK";
         }
-        return "OK\r\n>";
     }
+
     else if (request.startsWith("01")) {
-        if (request == "010C") {
-            qDebug() << "запрос оборотов";
-            return "41 0C 0B B8\r\n>";
+        if (request == "010D") {
+            nakedResponse = "410D31";
         }
     }
 
-    //formater work in future
+    /// форматирование ответа от двигателя к единному стилю
+    QByteArray response = Formatter::formatResponse(
+        nakedResponse, request, m_elmConfig);
+    qDebug() << "ответ движка нашего: " << response;
 
-    return "?\r\n>";
+    return response;
 }
