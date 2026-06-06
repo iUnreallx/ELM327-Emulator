@@ -1,4 +1,6 @@
 #include "src/core/pipeline/Router.h"
+#include "../commands/AtCommandHandler.h"
+#include "../commands/ObdCommandHandler.h"
 #include "Preprocessor.h"
 #include "Formatter.h"
 #include <QDebug>
@@ -10,20 +12,17 @@ QByteArray Router::routeIncomingData(const QByteArray& rawData) {
     QString request = Preprocessor::cleanRequest(rawData);
     qDebug() << "получили запрос от транспорта: " << request;
 
-    // todotodotodotodo
-    QString nakedResponse = "";
+
+    /// парсинг запроса и преобразоваие
+    /// его в ответ от классов
+    QString nakedResponse = "?";
+
     if (request.startsWith("AT")) {
-        if (request == "ATZ") {
-            nakedResponse = "ELM327 v1.5";
-        } else {
-            nakedResponse = "OK";
-        }
+        nakedResponse = AtCommandHandler::handle(request, m_elmConfig);
     }
 
     else if (request.startsWith("01")) {
-        if (request == "010D") {
-            nakedResponse = "410D31";
-        }
+        nakedResponse = ObdCommandHandler::handle(request, m_ecuState);
     }
 
     /// форматирование ответа от двигателя к единному стилю
