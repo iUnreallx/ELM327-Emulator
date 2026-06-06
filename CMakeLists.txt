@@ -35,6 +35,11 @@ qt_add_qml_module(Elm327-Emulator
         src/io/SerialTransport.cpp
         src/io/SerialTransport.h
 
+        src/core/commands/AtCommandHandler.cpp
+        src/core/commands/AtCommandHandler.h
+        src/core/commands/ObdCommandHandler.cpp
+        src/core/commands/ObdCommandHandler.h
+
 
 
     RESOURCES
