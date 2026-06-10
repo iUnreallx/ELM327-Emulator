@@ -14,7 +14,6 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
     qDebug() << "новый транспорт установлен";
 
     m_transport->setDataCallback([this] (const QByteArray &data) {
-
         QByteArray responce = m_router.routeIncomingData(data);
 
         if (!responce.isEmpty()) {
