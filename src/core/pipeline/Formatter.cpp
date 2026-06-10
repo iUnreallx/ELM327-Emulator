@@ -62,6 +62,7 @@ QByteArray Formatter::formatResponse(
         result += withoutSpaces + lineEnd;
     }
 
+    /// конечный автомат для каждой задачи
     if (config.appendPrompt)
     {
         if (!result.endsWith("\r\n"))
