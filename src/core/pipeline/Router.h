@@ -10,6 +10,13 @@ public:
 
     QByteArray routeIncomingData(const QByteArray &data);
 
+    EcuState& getEcuState() {
+        return m_ecuState;
+    }
+    ElmConfig& getElmConfig() {
+        return m_elmConfig;
+    }
+
 private:
     EcuState m_ecuState;
     ElmConfig m_elmConfig;

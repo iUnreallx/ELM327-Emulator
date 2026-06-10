@@ -12,16 +12,13 @@ QByteArray Router::routeIncomingData(const QByteArray& rawData) {
     QString request = Preprocessor::cleanRequest(rawData);
     qDebug() << "получили запрос от транспорта: " << request;
 
-
     /// парсинг запроса и преобразоваие
     /// его в ответ от классов
     QString nakedResponse = "?";
 
     if (request.startsWith("AT")) {
         nakedResponse = AtCommandHandler::handle(request, m_elmConfig);
-    }
-
-    else if (request.startsWith("01")) {
+    } else if (request.startsWith("01")) {
         nakedResponse = ObdCommandHandler::handle(request, m_ecuState);
     }
 
