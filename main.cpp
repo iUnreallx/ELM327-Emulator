@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include "src/core/ElmCore.h"
 #include "src/io/SerialTransport.h"
+#include "src/core/EcuModel.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,9 @@ int main(int argc, char *argv[])
     auto core = std::make_shared<ElmCore>();
 
     auto serialTransport = std::make_shared<SerialTransport>();
+
+    auto ecuModel = std::make_shared<EcuModel>(&core->getEcuState());
+    engine.rootContext()->setContextProperty("ecuModel", ecuModel.get());
 
     serialTransport->setPortName("COM6");
 
