@@ -59,20 +59,14 @@ QString AtCommandHandler::handle(const QString& request, ElmConfig& config) {
         return QString::number(config.voltage, 'f', 1) + "V";
     }
 
-
     /// выбор версии протокола ( просто заглушка )
     if (request.startsWith("ATSP")) {
         if (request.length() > 4) {
             int answer = request.mid(4).toInt();
-            if (answer == 0) {
-                config.currentProtocol = 777;
-            } else {
-                config.currentProtocol = request.mid(4).toInt();
-            }
+            config.currentProtocol = request.mid(4).toInt();
         }
         return "OK";
     }
-
 
     /// на будущее аппаратные настройки ( тайминги,
     /// пробуждение эбу и тд )
@@ -81,8 +75,6 @@ QString AtCommandHandler::handle(const QString& request, ElmConfig& config) {
         return "OK";
     }
 
-
     /// если чёт неизвестное
     return "?";
-
 }
