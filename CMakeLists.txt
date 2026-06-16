@@ -20,7 +20,10 @@ qt_add_qml_module(Elm327-Emulator
     VERSION 1.0
 
     QML_FILES
-        Qml/Main.qml
+        qml/Main.qml
+        qml/components/SidebarButton.qml
+        qml/pages/OverviewPage.qml
+        qml/components/SparklineGraph.qml
 
     SOURCES
 
@@ -40,6 +43,13 @@ qt_add_qml_module(Elm327-Emulator
         src/core/commands/ObdCommandHandler.cpp
         src/core/commands/ObdCommandHandler.h
 
+        src/core/pipeline/Preprocessor.h
+        src/core/pipeline/Preprocessor.cpp
+        src/core/pipeline/Formatter.cpp
+        src/core/pipeline/Formatter.h
+        src/core/EcuModel.cpp
+        src/core/EcuModel.h
+
 
 
     RESOURCES
@@ -47,12 +57,9 @@ qt_add_qml_module(Elm327-Emulator
         qml/assets/fonts/Ubuntu-Regular.ttf
         readme.md
         .gitignore
-        SOURCES src/core/pipeline/Preprocessor.h
-        SOURCES src/core/pipeline/Preprocessor.cpp
-        SOURCES src/core/pipeline/Formatter.cpp
-        SOURCES src/core/pipeline/Formatter.h
-        SOURCES src/core/EcuModel.cpp
-        SOURCES src/core/EcuModel.h
+        QML_FILES qml/components/ParameterCard.qml
+        QML_FILES qml/components/ConnectionPanel.qml
+
 )
 
 set_target_properties(Elm327-Emulator PROPERTIES
