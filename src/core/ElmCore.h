@@ -9,6 +9,8 @@ public:
 
     void setTransport(std::shared_ptr<ITransport> transport);
 
+    void setConnectionLostCallback(std::function<void()> callback);
+
     EcuState& getEcuState() {
         return m_router.getEcuState();
     }
@@ -19,4 +21,5 @@ public:
 private:
     Router m_router;
     std::shared_ptr<ITransport> m_transport;
+    std::function<void()> m_onConnectionLost;
 };

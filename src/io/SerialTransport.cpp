@@ -10,6 +10,10 @@ SerialTransport::~SerialTransport() {
     close();
 }
 
+QString SerialTransport::transportName() const {
+    return "QSerialPort (" + m_serialPort.portName() + ")";
+}
+
 void SerialTransport::setPortName(const QString& portName) {
     m_serialPort.setPortName(portName);
 }
