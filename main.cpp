@@ -2,8 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include "src/core/ElmCore.h"
-#include "src/io/SerialTransport.h"
 #include "src/core/EcuModel.h"
+#include "src/core/ConnectionManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,22 +15,12 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Elm327-Emulator");
 
     auto core = std::make_shared<ElmCore>();
-
-    auto serialTransport = std::make_shared<SerialTransport>();
-
     auto ecuModel = std::make_shared<EcuModel>(&core->getEcuState());
+
+    auto connectionManager = std::make_shared<ConnectionManager>(core);
+
     engine.rootContext()->setContextProperty("ecuModel", ecuModel.get());
-
-    serialTransport->setPortName("COM6");
-
-    if (serialTransport->open()) {
-        qDebug() << "Порт открыт";
-
-        core->setTransport(serialTransport);
-    } else {
-        qDebug() << "ошибк";
-        return -1;
-    }
+    engine.rootContext()->setContextProperty("connManager", connectionManager.get());
 
     QObject::connect(
         &engine,
