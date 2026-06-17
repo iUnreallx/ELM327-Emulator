@@ -8,7 +8,7 @@ Rectangle {
     // 0 - WIFI, 1 - Bluetooth, 2 - USB
     property int activeMode: 0
 
-    property bool isConnected: true
+    property bool isConnected: connManager.isConnected
     property string statusText: isConnected ? qsTr("Emulator is ready.")
                                             : qsTr("Waiting for connection...")
 
@@ -44,14 +44,12 @@ Rectangle {
                 anchors.top: parent.top
                 spacing: 30
 
-                // Разделительная линия
                 Rectangle {
                     Layout.preferredWidth: 1
                     Layout.fillHeight: true
                     color: "#1E293B"
                 }
 
-                // Правые настройки
                 ColumnLayout {
                     Layout.alignment: Qt.AlignTop
                     spacing: 20
@@ -65,36 +63,147 @@ Rectangle {
                             ColumnLayout {
                                 Text { text: qsTr("IP ADDRESS"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
                                 TextField {
+                                    id: ipField
                                     text: "192.168.1.50"
                                     color: "white"
                                     font.pixelSize: 14
-                                    background: Rectangle { color: "#1E293B"; radius: 4; implicitHeight: 30; implicitWidth: 150 }
+                                    verticalAlignment: TextInput.AlignVCenter
+
+                                    validator: RegularExpressionValidator {
+                                        /// Отбрасывает буквы + цифры более одного байта - 255
+                                        regularExpression: /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){0,3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)?$/
+                                    }
+                                    onTextEdited: {
+                                        let parts = text.split('.');
+                                        let lastPart = parts[parts.length - 1];
+                                        if (lastPart.length === 3 && parts.length < 4) {
+                                            text = text + ".";
+                                            cursorPosition = text.length;
+                                        }
+                                    }
+                                    background: Rectangle {
+                                        color: "#1E293B"
+                                        radius: 4
+                                        implicitHeight: 30
+                                        implicitWidth: 150
+                                    }
                                 }
                             }
 
                             ColumnLayout {
                                 Text { text: qsTr("PORT"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
                                 TextField {
+                                    id: portField
                                     text: "35000"
                                     color: "white"
+                                    verticalAlignment: TextInput.AlignVCenter
                                     font.pixelSize: 14
+                                    maximumLength: 5
+                                    validator: IntValidator {
+                                        bottom: 1
+                                        top: 65535
+                                    }
                                     background: Rectangle { color: "#1E293B"; radius: 4; implicitHeight: 30; implicitWidth: 100 }
                                 }
                             }
                         }
 
+                        /// управление com портами
                         RowLayout {
                             ColumnLayout {
                                 Text { text: qsTr("COM PORT"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
-                                TextField {
-                                    placeholderText: qsTr("e.g. COM3 or /dev/ttyUSB0")
-                                    color: "white"
-                                    font.pixelSize: 14
+
+                                ComboBox {
+                                    id: comField
+                                    editable: true
+                                    model: []
+
+                                    onDownChanged: {
+                                        if (down) {
+                                            comField.model = connManager.getAvailablePorts();
+                                        }
+                                    }
+
+                                    Component.onCompleted: {
+                                        editText = "COM6"
+                                    }
+
                                     background: Rectangle {
-                                        color: "#1E293B";
-                                        radius: 4;
-                                        implicitHeight: 30;
+                                        color: "#1E293B"
+                                        radius: 4
+                                        implicitHeight: 30
                                         implicitWidth: 290
+                                    }
+
+                                    contentItem: Item {
+                                        TextInput {
+                                            anchors.left: parent.left
+                                            anchors.top: parent.top
+                                            anchors.bottom: parent.bottom
+                                            anchors.right: parent.right
+                                            anchors.rightMargin: 40
+                                            anchors.leftMargin: 5
+                                            verticalAlignment: Text.AlignVCenter
+                                            text: comField.editText
+                                            color: "white"
+                                            font.pixelSize: 14
+                                            selectionColor: "#38BDF8"
+                                            selectedTextColor: "#0B1120"
+                                            selectByMouse: true
+                                            autoScroll: true
+                                            onTextEdited: comField.editText = text
+                                        }
+                                    }
+
+                                    indicator: Text {
+                                        x: comField.width - width - 15
+                                        y: comField.topPadding + (comField.availableHeight - height) / 2
+                                        text: "▼"
+                                        color: comField.popup.opened ? "#38BDF8" : "#94A3B8"
+                                        font.pixelSize: 12
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+
+                                    delegate: ItemDelegate {
+                                        width: comField.width
+                                        contentItem: Text {
+                                            text: modelData
+                                            color: "white"
+                                            font.pixelSize: 14
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
+                                        background: Rectangle {
+                                            color: hovered ? "#2D3748" : "#1E293B"
+                                        }
+                                    }
+
+                                    popup: Popup {
+                                        y: comField.height - 1
+                                        width: comField.width
+                                        implicitHeight: contentItem.implicitHeight
+                                        padding: 1
+                                        contentItem: ListView {
+                                            clip: true
+                                            implicitHeight: contentHeight
+                                            model: comField.popup.visible ? comField.delegateModel : null
+                                            currentIndex: comField.highlightedIndex
+                                        }
+                                        background: Rectangle {
+                                            color: "#1E293B"
+                                            border.color: "#0B1120"
+                                            radius: 4
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        width: 40
+                                        z: 99
+
+                                        cursorShape: Qt.PointingHandCursor
+                                        acceptedButtons: Qt.NoButton
                                     }
                                 }
                             }
@@ -269,7 +378,7 @@ Rectangle {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                root.isConnected = !root.isConnected
+                                connManager.toggleConnection(activeMode, ipField.text, portField.text, comField.editText)
                             }
                         }
                     }
