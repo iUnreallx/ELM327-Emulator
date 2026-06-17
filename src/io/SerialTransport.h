@@ -18,6 +18,8 @@ public:
     void setPortName(const QString& portName);
     void setBaudRate(int baudRaute);
 
+    QString transportName() const override;
+
     /// наследование от itransport
     void setDataCallback(DataReceivedCallback callback) override;
     void setConnectionCallback(ConnectionChangedCallback callback) override;
