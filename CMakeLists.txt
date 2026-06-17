@@ -59,6 +59,8 @@ qt_add_qml_module(Elm327-Emulator
         .gitignore
         QML_FILES qml/components/ParameterCard.qml
         QML_FILES qml/components/ConnectionPanel.qml
+        SOURCES src/core/ConnectionManager.h
+        SOURCES src/core/ConnectionManager.cpp
 
 )
 
