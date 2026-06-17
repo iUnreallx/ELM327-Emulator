@@ -15,6 +15,121 @@ ApplicationWindow {
     Material.theme: Material.Dark
     minimumWidth: 856
 
+    ///Errors message connection
+    Rectangle {
+        id: errorToast
+        width: errorText.implicitWidth + 40
+        height: 40
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: parent.height
+        color: "#E11D48"
+        radius: 8
+        z: 100
+
+        Text {
+            id: errorText
+            anchors.centerIn: parent
+            color: "white"
+            font.pixelSize: 14
+            font.bold: true
+        }
+
+        PropertyAnimation {
+            id: showAnimation
+            target: errorToast
+            property: "y"
+            to: window.height - 80
+            duration: 300
+            easing.type: Easing.OutBack
+        }
+
+        PropertyAnimation {
+            id: hideAnimation
+            target: errorToast
+            property: "y"
+            to: window.height
+            duration: 300
+            easing.type: Easing.InBack
+        }
+
+        Timer {
+            id: toastTimer
+            interval: 3000
+            onTriggered: hideAnimation.start()
+        }
+
+        function showMessage(msg) {
+            errorText.text = msg;
+            hideAnimation.stop();
+            showAnimation.start();
+            toastTimer.restart();
+        }
+    }
+
+    /// Success message connection
+        Rectangle {
+            id: successToast
+            width: successText.implicitWidth + 40
+            height: 40
+            anchors.horizontalCenter: parent.horizontalCenter
+            y: parent.height // Тоже изначально спрятан внизу
+            color: "#10B981" // Приятный зеленый цвет успеха
+            radius: 8
+            z: 100
+
+            Text {
+                id: successText
+                anchors.centerIn: parent
+                color: "white"
+                font.pixelSize: 14
+                font.bold: true
+            }
+
+            PropertyAnimation {
+                id: showSuccessAnimation
+                target: successToast
+                property: "y"
+                to: window.height - 80
+                duration: 300
+                easing.type: Easing.OutBack
+            }
+
+            PropertyAnimation {
+                id: hideSuccessAnimation
+                target: successToast
+                property: "y"
+                to: window.height
+                duration: 300
+                easing.type: Easing.InBack
+            }
+
+            Timer {
+                id: successToastTimer
+                interval: 3000
+                onTriggered: hideSuccessAnimation.start()
+            }
+
+            function showMessage(msg) {
+                successText.text = msg;
+                hideSuccessAnimation.stop();
+                showSuccessAnimation.start();
+                successToastTimer.restart();
+            }
+        }
+
+        // Обновленный блок Connections, который теперь слушает оба события
+        Connections {
+            target: connManager
+
+            function onErrorOccurred(message) {
+                errorToast.showMessage(message);
+            }
+
+            function onSuccessOccurred(message) {
+                successToast.showMessage(message);
+            }
+        } ///
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
