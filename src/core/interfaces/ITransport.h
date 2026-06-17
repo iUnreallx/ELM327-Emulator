@@ -11,6 +11,8 @@ public:
     using DataReceivedCallback = std::function<void(const QByteArray&)>;
     virtual void setDataCallback(DataReceivedCallback callback) = 0;
 
+    virtual QString transportName() const = 0;
+
     /// запись данных в транспортный уровень
     virtual void write(const QByteArray &data) = 0;
 
