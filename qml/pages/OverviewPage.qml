@@ -125,6 +125,10 @@ Item {
             }
         } /// конец пункта live даты
 
+        /// панель логирование
+        LogsPanel {
+            Layout.fillWidth: true
+        }
 
 
         Item { Layout.fillHeight: true }
