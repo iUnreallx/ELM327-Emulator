@@ -9,7 +9,14 @@ public:
 
     void setTransport(std::shared_ptr<ITransport> transport);
 
+    /// колбек о потере соединения с транспортом.
+    /// в данный момент управляет ConnectionManager.
     void setConnectionLostCallback(std::function<void()> callback);
+
+    /// колбек отвечающий за логирование.
+    /// ответсвенный так же ConnectionMngr
+    using LogCallback = std::function<void(bool isRx, const QByteArray& msg)>;
+    void setLogCallback(LogCallback callback);
 
     EcuState& getEcuState() {
         return m_router.getEcuState();
@@ -22,4 +29,5 @@ private:
     Router m_router;
     std::shared_ptr<ITransport> m_transport;
     std::function<void()> m_onConnectionLost;
+    LogCallback m_logCallback;
 };
