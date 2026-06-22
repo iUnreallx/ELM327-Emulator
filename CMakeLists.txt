@@ -55,12 +55,22 @@ qt_add_qml_module(Elm327-Emulator
     RESOURCES
         qml/assets/fonts/Ubuntu-Bold.ttf
         qml/assets/fonts/Ubuntu-Regular.ttf
+        qml/assets/logsPanel/play.svg
+        qml/assets/logsPanel/pause.svg
+        qml/assets/logsPanel/clear.svg
+        qml/assets/logsPanel/export.svg
         readme.md
         .gitignore
         QML_FILES qml/components/ParameterCard.qml
         QML_FILES qml/components/ConnectionPanel.qml
         SOURCES src/core/ConnectionManager.h
         SOURCES src/core/ConnectionManager.cpp
+        QML_FILES qml/components/LogsPanel.qml
+        SOURCES src/core/LogManager.h
+        SOURCES src/core/LogManager.cpp
+        QML_FILES qml/components/ToastNotification.qml
+        qml/assets/connectionPanel/info.svg
+
 
 )
 
