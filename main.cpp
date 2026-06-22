@@ -4,6 +4,7 @@
 #include "src/core/ElmCore.h"
 #include "src/core/EcuModel.h"
 #include "src/core/ConnectionManager.h"
+#include "src/core/LogManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,10 +18,12 @@ int main(int argc, char *argv[])
     auto core = std::make_shared<ElmCore>();
     auto ecuModel = std::make_shared<EcuModel>(&core->getEcuState());
 
+    auto logManager = std::make_shared<LogManager>(core);
     auto connectionManager = std::make_shared<ConnectionManager>(core);
 
     engine.rootContext()->setContextProperty("ecuModel", ecuModel.get());
     engine.rootContext()->setContextProperty("connManager", connectionManager.get());
+    engine.rootContext()->setContextProperty("logManager", logManager.get());
 
     QObject::connect(
         &engine,

@@ -68,6 +68,47 @@ Rectangle {
             stepSize: root.step
             Layout.fillWidth: true
 
+            focusPolicy: Qt.NoFocus
+
+            background: Rectangle {
+                x: internalSlider.leftPadding
+                y: internalSlider.topPadding + (internalSlider.availableHeight - height) / 2
+                implicitWidth: 200
+                implicitHeight: 4
+                width: internalSlider.availableWidth
+                height: implicitHeight
+                radius: 2
+                color: "#1E293B"
+
+
+                Rectangle {
+                    width: internalSlider.visualPosition * parent.width
+                    height: parent.height
+                    color: "#38BDF8"
+                    radius: 2
+                }
+            }
+
+            handle: Rectangle {
+                x: internalSlider.leftPadding + internalSlider.visualPosition * (internalSlider.availableWidth - width)
+                y: internalSlider.topPadding + (internalSlider.availableHeight - height) / 2
+                implicitWidth: 14
+                implicitHeight: 14
+                radius: 7
+
+                color: (internalSlider.pressed || hoverSlider.hovered) ? "#FFFFFF" : "#38BDF8"
+
+                border.color: internalSlider.pressed ? "#070E16" : "transparent"
+                border.width: 2
+
+                Behavior on color { ColorAnimation { duration: 100 } }
+
+                HoverHandler {
+                    id: hoverSlider
+                    cursorShape: Qt.PointingHandCursor
+                }
+            }
+
             onValueChanged: {
                 root.history.push(value)
                 if (root.history.length > root.maxHistoryPoints) {
