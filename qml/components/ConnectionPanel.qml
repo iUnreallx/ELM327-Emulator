@@ -309,42 +309,105 @@ Rectangle {
                     }
                 }
 
-                /// status
+                /// status & action block
                 ColumnLayout {
-                    spacing: 2
-
+                    id: statusBlock
+                    spacing: 4
+                    Layout.fillWidth: true
                     RowLayout {
-                        Rectangle {
-                            width: 10
-                            height: 10
-                            radius: 5
-                            color: isConnected ? "#41CD52" : "#F44336"
+                        Layout.fillWidth: true
+                        spacing: 8
+                        Layout.alignment: Qt.AlignVCenter
+
+                        ColumnLayout {
+                            spacing: 0
+                            Layout.alignment: Qt.AlignVCenter
+
+                            RowLayout {
+                                spacing: 6
+                                Rectangle {
+                                    width: 8
+                                    height: 8
+                                    radius: 4
+                                    color: isConnected ? "#41CD52" : "#F44336"
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                                Text {
+                                    text: isConnected ? qsTr("Connected") : qsTr("Disconnected")
+                                    color: isConnected ? "#41CD52" : "#F44336"
+                                    font.bold: true
+                                    font.pixelSize: 13
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                            }
+
+                            Text {
+                                text: root.statusText
+                                color: "#94A3B8"
+                                font.pixelSize: 12
+                            }
                         }
 
-                        Text {
-                            text: isConnected ? qsTr("Connected") : qsTr("Disconnected")
-                            color: isConnected ? "#41CD52" : "#F44336"
-                            font.bold: true
+                        Item {
+                            Layout.fillWidth: true
                         }
-                    }
 
-                    Text {
-                        text: root.statusText
-                        color: "#94A3B8"
-                        font.pixelSize: 12
+                        IconImage {
+                            id: infoIcon
+                            source: "../assets/connectionPanel/info.svg"
+                            Layout.preferredWidth: 14
+                            Layout.preferredHeight: 14
+                            sourceSize: Qt.size(14, 14)
+                            color: hoverInfo.hovered ? "#FFFFFF" : "#64748B"
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Behavior on color { ColorAnimation { duration: 150 } }
+
+                            HoverHandler {
+                                id: hoverInfo
+                                cursorShape: Qt.PointingHandCursor
+                            }
+
+                            ToolTip {
+                                id: infoToolTip
+                                visible: hoverInfo.hovered
+                                delay: 300
+                                text: {
+                                    if (root.activeMode === 0) {
+                                        return qsTr("Wi-Fi (TCP): Эмулирует точку доступа. Клиент подключается по IP и порту 35000.");
+                                    } else if (root.activeMode === 1) {
+                                        return qsTr("Bluetooth: Требуется настроенный виртуальный COM-порт связи.");
+                                    } else {
+                                        return qsTr("USB (COM): Прямое serial-соединение на скорости 38400 бод.");
+                                    }
+                                }
+
+                                background: Rectangle {
+                                    color: "#0F172A"
+                                    border.color: "#334155"
+                                    border.width: 1
+                                    radius: 6
+                                }
+                                contentItem: Text {
+                                    text: infoToolTip.text
+                                    color: "#E2E8F0"
+                                    font.pixelSize: 11
+                                    font.family: "Ubuntu-Regular"
+                                }
+                            }
+                        }
                     }
 
                     Item {
-                        height: 4.5
+                        Layout.preferredHeight: 0
                     }
 
-                    /// button start / stop
+                    /// КНОПКА START / STOP SERVER
                     Rectangle {
                         id: actionButton
                         Layout.fillWidth: true
                         Layout.preferredHeight: 36
                         radius: 6
-
                         color: isConnected ? "#E11D48" : "#10B981"
 
                         Behavior on color {
