@@ -2,6 +2,10 @@
 #include "../io/SerialTransport.h"
 #include <QSerialPortInfo>
 #include <QDebug>
+#include <QTime>
+#include <QFile>
+#include <QTextStream>
+#include <QUrl>
 
 ConnectionManager::ConnectionManager(std::shared_ptr<ElmCore> core, QObject *parent) :
     QObject(parent), m_core(core) {
@@ -11,6 +15,7 @@ ConnectionManager::ConnectionManager(std::shared_ptr<ElmCore> core, QObject *par
         setConnected(false);
         emit errorOccurred("Связь с портом неожиданно потеряна!");
     });
+
 }
 
 QStringList ConnectionManager::getAvailablePorts() const {
