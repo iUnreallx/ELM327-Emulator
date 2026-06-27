@@ -70,6 +70,8 @@ qt_add_qml_module(Elm327-Emulator
         SOURCES src/core/LogManager.cpp
         QML_FILES qml/components/ToastNotification.qml
         qml/assets/connectionPanel/info.svg
+        SOURCES src/core/DelayManager.cpp
+        SOURCES src/core/DelayManager.h
 
 
 )
