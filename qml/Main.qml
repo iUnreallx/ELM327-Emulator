@@ -10,10 +10,11 @@ ApplicationWindow {
     visible: true
     title: "Elm327 Emulator"
     width: 1100
-    height: 700
+    height: 650
     color: "#070E16"
     Material.theme: Material.Dark
     minimumWidth: 856
+    minimumHeight: 400
 
     ToastNotification {
         id: globalToast
@@ -57,14 +58,14 @@ ApplicationWindow {
                 anchors.margins: 15
                 spacing: 8
 
-                // Text {
-                //     text: qsTr("ELM EMULATOR")
-                //     color: "white"
-                //     font.pixelSize: 18
-                //     font.bold: true
-                //     Layout.bottomMargin: 20
-                //     Layout.leftMargin: 15
-                // }
+                Text {
+                    text: qsTr("ELM EMULATOR")
+                    color: "white"
+                    font.pixelSize: 18
+                    font.bold: true
+                    Layout.alignment: Qt.AlignHCenter
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
                 SidebarButton {
                     buttonText: qsTr("Overview")
@@ -79,9 +80,27 @@ ApplicationWindow {
                 }
 
                 SidebarButton {
-                    buttonText: qsTr("Settings")
+                    buttonText: qsTr("Delay")
                     isActive: pageStack.currentIndex === 2
                     onClicked: pageStack.currentIndex = 2
+                }
+
+                SidebarButton {
+                    buttonText: qsTr("DTC")
+                    isActive: pageStack.currentIndex === 3
+                    onClicked: pageStack.currentIndex = 3
+                }
+
+                SidebarButton {
+                    buttonText: qsTr("Logs")
+                    isActive: pageStack.currentIndex === 4
+                    onClicked: pageStack.currentIndex = 4
+                }
+
+                SidebarButton {
+                    buttonText: qsTr("Settings")
+                    isActive: pageStack.currentIndex === 5
+                    onClicked: pageStack.currentIndex = 5
                 }
 
                 Item { Layout.fillHeight: true }
@@ -95,7 +114,6 @@ ApplicationWindow {
             currentIndex: 0
 
             OverviewPage {}
-
 
         }
     }
