@@ -5,6 +5,7 @@
 #include "src/core/EcuModel.h"
 #include "src/core/ConnectionManager.h"
 #include "src/core/LogManager.h"
+#include "src/core/DelayManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +21,9 @@ int main(int argc, char *argv[])
 
     auto logManager = std::make_shared<LogManager>(core);
     auto connectionManager = std::make_shared<ConnectionManager>(core);
+
+    auto delayManager = std::make_shared<DelayManager>();
+    core->setDelayManager(delayManager);
 
     engine.rootContext()->setContextProperty("ecuModel", ecuModel.get());
     engine.rootContext()->setContextProperty("connManager", connectionManager.get());
