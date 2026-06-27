@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
+import QtQuick.Controls.Basic as Basic
 Rectangle {
     id: root
     color: "#0B1120"
@@ -58,7 +59,7 @@ Rectangle {
             Layout.preferredHeight: 40
             color: "transparent"
 
-            Rectangle { // Нижняя граница хедера
+            Rectangle {
                 width: parent.width; height: 1
                 color: "#1E293B"; anchors.bottom: parent.bottom
             }
@@ -152,7 +153,6 @@ Rectangle {
             }
         }
 
-        // ================= LIST VIEW =================
         ListModel { id: logModel }
 
         Connections {
@@ -170,6 +170,21 @@ Rectangle {
                 root.txCount = 0
             }
         }
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.margins: 10
+            visible: logModel.count >= 1 ? 0 : 1
+
+            Text {
+                anchors.left: parent.left
+                text: qsTr("Logs not found")
+                color: "#64748B"
+                font.pixelSize: 12
+                font.letterSpacing: 1.5
+                anchors.leftMargin: 6
+            }
+        }
 
         ListView {
             id: listView
@@ -179,8 +194,8 @@ Rectangle {
             clip: true
             model: logModel
             spacing: 8
+            visible: logModel.count >= 1 ? 1 : 0
 
-            // Если юзер крутит колесико вверх — отключаем автоскролл
             onContentYChanged: {
                 if (contentY < contentHeight - height - 20) {
                     root.autoScroll = false;
@@ -224,26 +239,37 @@ Rectangle {
                 }
             }
 
-            Text {
-                text: qsTr("Logs not found")
-                color: "#64748B"
-                font.pixelSize: 12
-                font.letterSpacing: 1.5
-                anchors.leftMargin: 14
-                visible: logModel.count === 0
-            }
+            ScrollBar.vertical: Basic.ScrollBar {
+                id: customScrollBarVertical
+                policy: ScrollBar.AlwaysOn
+                implicitWidth: 10
+                width: 10
+                padding: 0
 
-            ScrollBar.vertical: ScrollBar {
-                active: true
+                background: Rectangle {
+                    implicitWidth: 10
+                    implicitHeight: customScrollBarVertical.height + 8
+                    color: customScrollBarVertical.hovered ? "#563A4A" : "#5B2946"
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
                 contentItem: Rectangle {
-                    implicitWidth: 6
-                    radius: 3
-                    color: parent.pressed ? "#475569" : "#334155"
+                    implicitWidth: 8
+                    implicitHeight: 100
+                    radius: 4
+                    color: customScrollBarVertical.pressed ? "#7FE8B4" :
+                           (customScrollBarVertical.hovered ? "#66e8a3" : "#57AF80")
+                    Behavior on color {
+                        ColorAnimation { duration: 150; easing.type: Easing.InOutQuad }
+                    }
+                    Behavior on height {
+                        NumberAnimation { duration: 150; easing.type: Easing.Linear }
+                    }
                 }
             }
         }
 
-        // ================= FOOTER =================
+        /// вверх
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 30
@@ -265,7 +291,7 @@ Rectangle {
                     font.pixelSize: 11
                 }
 
-                Item { Layout.fillWidth: true } // Spacer
+                Item { Layout.fillWidth: true }
 
                 Text {
                     text: `Packets (TX/RX): ${root.txCount} / ${root.rxCount}`
