@@ -1,4 +1,6 @@
 #include "ElmCore.h"
+#include <random>
+#include <QTimer>
 #include <QDebug>
 
 ElmCore::ElmCore() {}
@@ -9,6 +11,10 @@ void ElmCore::setConnectionLostCallback(std::function<void()> callback) {
 
 void ElmCore::setLogCallback(LogCallback callback) {
     m_logCallback = callback;
+}
+
+void ElmCore::setDelayManager(std::shared_ptr<DelayManager> manager) {
+    m_delayManager = manager;
 }
 
 void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
@@ -37,10 +43,38 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
             QByteArray responce = m_router.routeIncomingData(data);
 
             if (!responce.isEmpty()) {
-                m_transport->write(responce);
-                if (m_logCallback) {
-                    /// tx
-                    m_logCallback(false, responce);
+                int delayMs = 0;
+
+                if (m_delayManager) {
+                    delayMs = data.startsWith("AT") ? m_delayManager->atDelay() :
+                                  m_delayManager->obdDelay();
+
+                    int currentJitter = m_delayManager->jitter();
+
+                    if (currentJitter > 0 && delayMs > 0) {
+                        static std::mt19937 gen(std::random_device{}());
+                        std::uniform_int_distribution<> dist(-currentJitter, currentJitter);
+
+                        delayMs = std::max(0, delayMs + dist(gen));
+                    }
+                }
+
+                if (delayMs > 0) {
+                    QTimer::singleShot(delayMs, [this, responce]() {
+                        if (m_transport) {
+                            m_transport->write(responce);
+                            if (m_logCallback) {
+                                /// tx
+                                m_logCallback(false, responce);
+                            }
+                        }
+                    });
+                } else {
+                    m_transport->write(responce);
+                    if (m_logCallback) {
+                        /// tx
+                        m_logCallback(false, responce);
+                    }
                 }
             }
         });

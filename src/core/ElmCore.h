@@ -2,6 +2,7 @@
 #include <memory>
 #include "interfaces/ITransport.h"
 #include "pipeline/Router.h"
+#include "DelayManager.h"
 
 class ElmCore {
 public:
@@ -25,8 +26,11 @@ public:
         return m_router.getElmConfig();
     }
 
+    void setDelayManager(std::shared_ptr<DelayManager> manager);
+
 private:
     Router m_router;
+    std::shared_ptr<DelayManager> m_delayManager;
     std::shared_ptr<ITransport> m_transport;
     std::function<void()> m_onConnectionLost;
     LogCallback m_logCallback;
