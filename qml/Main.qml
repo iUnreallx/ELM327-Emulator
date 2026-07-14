@@ -13,8 +13,12 @@ ApplicationWindow {
     height: 650
     color: "#070E16"
     Material.theme: Material.Dark
-    minimumWidth: 856
-    minimumHeight: 400
+    minimumWidth: 818
+    minimumHeight: 447
+
+    onHeightChanged: {
+        console.log( window.height)
+    }
 
     ToastNotification {
         id: globalToast
@@ -49,22 +53,47 @@ ApplicationWindow {
         spacing: 0
 
         Rectangle {
-            Layout.preferredWidth: 220
+            Layout.preferredWidth: 180
             Layout.fillHeight: true
             color: "#0D1520"
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 15
+                anchors.margins: 12
                 spacing: 8
 
-                Text {
-                    text: qsTr("ELM EMULATOR")
-                    color: "white"
-                    font.pixelSize: 18
-                    font.bold: true
+                RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    horizontalAlignment: Text.AlignHCenter
+                    spacing: 0
+
+                    IconImage {
+                        source: "assets/sidebar/logo.png"
+                        sourceSize: Qt.size(52, 52)
+                        // color: "#38BDF8"
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    ColumnLayout {
+                        spacing: 0
+                        Layout.alignment: Qt.AlignVCenter
+
+                        Text {
+                            text: "Elm"
+                            color: "white"
+                            font.pixelSize: 20
+                            font.bold: true
+                            font.family: "Ubuntu-Bold"
+                            font.letterSpacing: 1.9
+                        }
+
+                        Text {
+                            text: "EMULATOR"
+                            color: "#38BDF8"
+                            font.pixelSize: 10
+                            font.bold: true
+                            font.letterSpacing: 2.5
+                        }
+                    }
                 }
 
                 SidebarButton {
@@ -80,27 +109,34 @@ ApplicationWindow {
                 }
 
                 SidebarButton {
-                    buttonText: qsTr("Delay")
+                    buttonText: qsTr("Cards")
                     isActive: pageStack.currentIndex === 2
                     onClicked: pageStack.currentIndex = 2
                 }
 
+
                 SidebarButton {
-                    buttonText: qsTr("DTC")
+                    buttonText: qsTr("Delay")
                     isActive: pageStack.currentIndex === 3
                     onClicked: pageStack.currentIndex = 3
                 }
 
                 SidebarButton {
-                    buttonText: qsTr("Logs")
+                    buttonText: qsTr("DTC")
                     isActive: pageStack.currentIndex === 4
                     onClicked: pageStack.currentIndex = 4
                 }
 
                 SidebarButton {
-                    buttonText: qsTr("Settings")
+                    buttonText: qsTr("Logs")
                     isActive: pageStack.currentIndex === 5
                     onClicked: pageStack.currentIndex = 5
+                }
+
+                SidebarButton {
+                    buttonText: qsTr("Settings")
+                    isActive: pageStack.currentIndex === 6
+                    onClicked: pageStack.currentIndex = 6
                 }
 
                 Item { Layout.fillHeight: true }
@@ -114,6 +150,10 @@ ApplicationWindow {
             currentIndex: 0
 
             OverviewPage {}
+
+            ConnectionPage {}
+
+            CardsPage {}
 
         }
     }
