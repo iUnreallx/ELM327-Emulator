@@ -18,6 +18,8 @@ Rectangle {
 
     property var history: []
     property alias value: internalSlider.value
+    property url iconSource: ""
+    property int sizeVariant: 0
 
     readonly property int maxHistoryPoints: 100
     readonly property color highlightColor: "#38BDF8"
@@ -27,10 +29,24 @@ Rectangle {
         anchors.margins: 15
         spacing: 5
 
-        Text {
-            text: root.title
-            color: "#94A3B8"
-            font.pixelSize: 14
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+
+            IconImage {
+                source: root.iconSource
+                visible: root.iconSource.toString() !== ""
+                Layout.preferredWidth: 20 + sizeVariant
+                Layout.preferredHeight: 20 + sizeVariant
+                color: "#94A3B8"
+                opacity: 0.7
+                Layout.alignment: Qt.AlignVCenter
+            }
+            Text {
+                text: root.title
+                color: "#94A3B8"
+                font.pixelSize: 14
+            }
         }
 
         RowLayout {

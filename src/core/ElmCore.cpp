@@ -9,6 +9,10 @@ void ElmCore::setConnectionLostCallback(std::function<void()> callback) {
     m_onConnectionLost = callback;
 }
 
+void ElmCore::setConnectionGetCallback(std::function<void()> callback) {
+    m_onConnectionGet = callback;
+}
+
 void ElmCore::setLogCallback(LogCallback callback) {
     m_logCallback = callback;
 }
@@ -22,6 +26,7 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
         m_transport->setDataCallback(nullptr);
         m_transport->setConnectionCallback(nullptr);
         m_transport->close();
+        m_isSessionGet = false;
     }
 
     QString previousTransport = "none";
@@ -43,6 +48,11 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
             QByteArray responce = m_router.routeIncomingData(data);
 
             if (!responce.isEmpty()) {
+                if (m_onConnectionGet && !m_isSessionGet) {
+                    m_onConnectionGet();
+                }
+                m_isSessionGet = true;
+
                 int delayMs = 0;
 
                 if (m_delayManager) {
@@ -87,9 +97,11 @@ void ElmCore::setTransport(std::shared_ptr<ITransport> newTransport) {
                 qDebug() << "связь разорвана";
                 if (m_onConnectionLost) {
                     m_onConnectionLost();
+                    m_isSessionGet = false;
                 }
             }
         });
+
     } else {
          qDebug() << "транспорт " << previousTransport << " сброшен";
     }

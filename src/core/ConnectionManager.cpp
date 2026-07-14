@@ -16,6 +16,10 @@ ConnectionManager::ConnectionManager(std::shared_ptr<ElmCore> core, QObject *par
         emit errorOccurred("Связь с портом неожиданно потеряна!");
     });
 
+    m_core->setConnectionGetCallback([this]() {
+        emit successOccurred("Стартуем сессию!");
+    });
+
 }
 
 QStringList ConnectionManager::getAvailablePorts() const {
@@ -64,8 +68,9 @@ void ConnectionManager::toggleConnection(
         serialTransport -> setPortName(mainComPort);
         serialTransport -> setBaudRate(38400);
 
+        m_core->setTransport(serialTransport);
         if (serialTransport->open()) {
-            m_core->setTransport(serialTransport);
+
             setConnected(true);
 
             QString succesConnectionMsg = "Успешное подключение: " + serialTransport->transportName();

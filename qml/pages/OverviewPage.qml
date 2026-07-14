@@ -49,8 +49,8 @@ Item {
                         anchors.margins: 16
                         spacing: 12
 
-                        RowLayout {
-                            Layout.fillWidth: true
+                            RowLayout {
+                                Layout.fillWidth: true
 
                             Text {
                                 text: qsTr("LIVE DATA")
@@ -74,7 +74,7 @@ Item {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        pageStack.currentIndex = 3
+                                        pageStack.currentIndex = 2
                                     }
                                 }
                             }
@@ -95,6 +95,7 @@ Item {
                                 height: liveDataPanel.height - 60
                                 title: qsTr("Vehicle Speed")
                                 unit: qsTr("km/h")
+                                iconSource: "../assets/parametersCard/speed.svg"
                                 minValue: 0
                                 maxValue: 255
                                 step: 1
@@ -107,7 +108,9 @@ Item {
                                 height: liveDataPanel.height - 60
                                 title: qsTr("Engine RPM")
                                 unit: qsTr("rpm")
+                                iconSource: "../assets/parametersCard/engine.svg"
                                 minValue: 0
+                                sizeVariant: 1
                                 maxValue: 15000
                                 step: 50
                                 value: ecuModel.rpm
@@ -119,6 +122,8 @@ Item {
                                 height: liveDataPanel.height - 60
                                 title: qsTr("Coolant Temp")
                                 unit: qsTr("°C")
+                                iconSource: "../assets/parametersCard/temp.svg"
+                                sizeVariant: 1
                                 minValue: -40
                                 maxValue: 150
                                 step: 1
@@ -130,6 +135,8 @@ Item {
                                 height: liveDataPanel.height - 60
                                 title: qsTr("Battery Voltage")
                                 unit: qsTr("V")
+                                sizeVariant: 2
+                                iconSource: "../assets/parametersCard/voltage.svg"
                                 minValue: 0
                                 maxValue: 18
                                 step: 0.1
