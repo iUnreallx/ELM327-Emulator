@@ -16,7 +16,9 @@ public:
     Q_INVOKABLE void clearLogs();
     Q_INVOKABLE bool exportLogs(const QString& path);
 
-    bool isLogPaused() const { return m_isLogPaused; }
+    bool isLogPaused() const {
+        return m_isLogPaused;
+    }
     void setLogPaused(bool isPause);
 
 signals:

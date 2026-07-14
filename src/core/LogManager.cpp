@@ -31,6 +31,7 @@ LogManager::LogManager(std::shared_ptr<ElmCore> core, QObject *parent)
             m_logBuffer.removeFirst();
         }
 
+
         emit logsAdded(isRx, text, timestamp);
     });
 }
