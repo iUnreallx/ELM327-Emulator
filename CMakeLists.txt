@@ -72,6 +72,15 @@ qt_add_qml_module(Elm327-Emulator
         qml/assets/connectionPanel/info.svg
         SOURCES src/core/DelayManager.cpp
         SOURCES src/core/DelayManager.h
+        RESOURCES qml/assets/parametersCard/engine.svg qml/assets/parametersCard/speed.svg qml/assets/parametersCard/temp.svg qml/assets/parametersCard/voltage.svg
+        QML_FILES qml/pages/ConnectionPage.qml
+        RESOURCES qml/assets/sidebar/logo.png
+        QML_FILES qml/pages/DelayPage.qml
+        QML_FILES qml/pages/DtcPage.qml
+        QML_FILES qml/pages/LogsPage.qml
+        QML_FILES qml/pages/SettingsPage.qml
+        QML_FILES
+        QML_FILES qml/pages/CardsPage.qml
 
 
 )

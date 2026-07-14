@@ -1,7 +1,7 @@
 <a id="readme"></a>
 <div align="center">
 
-![Preview](Qml/assets/preview.png)
+![Preview](qml/assets/preview.png)
 
 ![C++](https://img.shields.io/badge/C++-17/20-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
 ![Qt](https://img.shields.io/badge/Qt-6-41CD52?style=for-the-badge&logo=qt&logoColor=white)
