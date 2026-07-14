@@ -376,9 +376,9 @@ Rectangle {
                                     if (root.activeMode === 0) {
                                         return qsTr("Wi-Fi (TCP): Эмулирует точку доступа. Клиент подключается по IP и порту 35000.");
                                     } else if (root.activeMode === 1) {
-                                        return qsTr("Bluetooth: Требуется настроенный виртуальный COM-порт связи.");
+                                        return qsTr("Bluetooth: Включите bluetooth на устройстве, и выберите свободный com-port.\nПосле этого сопрягите устройство с obd2 приложением.");
                                     } else {
-                                        return qsTr("USB (COM): Прямое serial-соединение на скорости 38400 бод.");
+                                        return qsTr("USB (COM): Подключите кабель к устройству и выберите созданный последовательный порт.\nПрямое serial-соединение на скорости 38400 бод.");
                                     }
                                 }
 
@@ -392,6 +392,9 @@ Rectangle {
                                     text: infoToolTip.text
                                     color: "#E2E8F0"
                                     font.pixelSize: 11
+                                    horizontalAlignment: Text.AlignHCenter
+                                            // Настройка межстрочного интервала (если захочется сделать еще плотнее)
+                                            // lineHeight: 1.1
                                     font.family: "Ubuntu-Regular"
                                 }
                             }

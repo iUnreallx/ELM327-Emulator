@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.15
 
 /// Это кнопки боковой панели, мы передаём три свойства
 /// Текст, состояние активности, и лямбду при клике
-
 Rectangle {
     id: root
 
@@ -16,7 +15,7 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.preferredHeight: 45
-    radius: 8
+    radius: 50
 
     readonly property color bgActive: "#1E293B"
     readonly property color bgActiveHover: "#2D3748"
@@ -44,11 +43,13 @@ Rectangle {
                 if (root.isActive) return textActive
                 return isHovered ? textInactiveHover : textInactive
             }
+            opacity: isActive ? 0.8 : 1
             font.pixelSize: 15
-            font.bold: root.isActive
+            font.bold: isActive
+
             Layout.fillWidth: true
 
-            Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on color { ColorAnimation { duration: 250 } }
         }
     }
 

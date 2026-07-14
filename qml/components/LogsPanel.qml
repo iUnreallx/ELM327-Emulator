@@ -30,15 +30,15 @@ Rectangle {
 
     Timer {
         interval: 1000
-        running: connManager.isConnected
+        running: connManager.connectionState === 2
         repeat: true
         onTriggered: root.uptimeSeconds++
     }
 
     Connections {
         target: connManager
-        function onConnectionChanged(isConnected) {
-            if (!isConnected) root.uptimeSeconds = 0;
+        function onconnectionStateChanged(state) {
+            if (state === 1) root.uptimeSeconds = 0;
         }
     }
 
@@ -275,7 +275,7 @@ Rectangle {
             Layout.preferredHeight: 30
             color: "transparent"
 
-            Rectangle { // Верхняя граница футера
+            Rectangle {
                 width: parent.width; height: 1
                 color: "#1E293B"; anchors.top: parent.top
             }
@@ -301,7 +301,7 @@ Rectangle {
 
                 Rectangle {
                     width: 8; height: 8; radius: 4
-                    color: logManager.isConnected ? (logManager.isLogPaused ? "#EAB308" : "#10B981") : "#F44336"
+                    color: connManager.isConnected ? "#41CD52" : "#F44336"
                 }
             }
         }
