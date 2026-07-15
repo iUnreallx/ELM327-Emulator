@@ -17,7 +17,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Elm327-Emulator");
 
     auto core = std::make_shared<ElmCore>();
-    auto ecuModel = std::make_shared<EcuModel>(&core->getEcuState());
+    auto ecuModel = std::make_shared<EcuModel>(
+        &core->getEcuState(),
+        &core->getElmConfig()
+    );
 
     auto logManager = std::make_shared<LogManager>(core);
     auto connectionManager = std::make_shared<ConnectionManager>(core);
@@ -25,6 +28,7 @@ int main(int argc, char *argv[])
     auto delayManager = std::make_shared<DelayManager>();
     core->setDelayManager(delayManager);
 
+    engine.rootContext()->setContextProperty("delayManager", delayManager.get());
     engine.rootContext()->setContextProperty("ecuModel", ecuModel.get());
     engine.rootContext()->setContextProperty("connManager", connectionManager.get());
     engine.rootContext()->setContextProperty("logManager", logManager.get());

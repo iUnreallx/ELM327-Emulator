@@ -4,7 +4,6 @@
 class DelayManager : public QObject {
     Q_OBJECT
 
-    // Делаем свойства доступными из QML
     Q_PROPERTY(int atDelay READ atDelay WRITE setAtDelay NOTIFY atDelayChanged)
     Q_PROPERTY(int obdDelay READ obdDelay WRITE setObdDelay NOTIFY obdDelayChanged)
     Q_PROPERTY(int jitter READ jitter WRITE setJitter NOTIFY jitterChanged)

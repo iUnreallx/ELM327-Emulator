@@ -114,30 +114,31 @@ ApplicationWindow {
                     onClicked: pageStack.currentIndex = 2
                 }
 
-
                 SidebarButton {
-                    buttonText: qsTr("Delay")
+                    buttonText: qsTr("Logs")
                     isActive: pageStack.currentIndex === 3
                     onClicked: pageStack.currentIndex = 3
                 }
 
                 SidebarButton {
-                    buttonText: qsTr("DTC")
+                    buttonText: qsTr("Delay")
                     isActive: pageStack.currentIndex === 4
                     onClicked: pageStack.currentIndex = 4
                 }
 
-                SidebarButton {
-                    buttonText: qsTr("Logs")
-                    isActive: pageStack.currentIndex === 5
-                    onClicked: pageStack.currentIndex = 5
-                }
+                // SidebarButton {
+                //     buttonText: qsTr("DTC")
+                //     isActive: pageStack.currentIndex === 4
+                //     onClicked: pageStack.currentIndex = 4
+                // }
 
-                SidebarButton {
-                    buttonText: qsTr("Settings")
-                    isActive: pageStack.currentIndex === 6
-                    onClicked: pageStack.currentIndex = 6
-                }
+
+
+                // SidebarButton {
+                //     buttonText: qsTr("Settings")
+                //     isActive: pageStack.currentIndex === 6
+                //     onClicked: pageStack.currentIndex = 6
+                // }
 
                 Item { Layout.fillHeight: true }
             }
@@ -154,6 +155,10 @@ ApplicationWindow {
             ConnectionPage {}
 
             CardsPage {}
+
+            LogsPage {}
+
+            DelayPage {}
 
         }
     }

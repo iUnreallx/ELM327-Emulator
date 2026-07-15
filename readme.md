@@ -15,7 +15,7 @@
 
 # ELM327 Emulator
 
-> **ELM327 Emulator** is a lightweight open-source desktop tool for simulating ELM327 / OBD2 adapter responses without real vehicle hardware.
+> **ELM327 Emulator** is a lightweight open-source desktop tool for simulating ELM327 adapter responses without real vehicle hardware.
 
 It allows developers to test OBD2 dashboards, diagnostic tools, and serial communication logic in a controlled virtual environment.
 
@@ -35,28 +35,37 @@ The project is useful for:
 
 ## Key Features
 
-- **ELM327 Command Simulation**  
-  Handles common ELM327 and OBD2 requests.
+- **ELM327 and OBD2 Command Simulation**  
+  Handles common AT commands, Mode 01 requests, and supported PID discovery through `0100`.
 
 - **Live Vehicle Data Emulation**  
-  Simulates RPM, speed, coolant temperature, and battery voltage.
+  Simulates engine RPM, vehicle speed, coolant temperature, battery voltage, engine load, and throttle position.
+
+- **Configurable Response Timing**  
+  Allows separate delays for AT commands and OBD2 requests, including optional random jitter.
 
 - **Serial Port Communication**  
-  Works through a COM / serial-port based transport layer.
+  Works through COM and virtual serial ports. ( Wifi && USB connection soon )
 
-- **Qt/QML Interface**  
-  Provides a clean desktop UI for controlling simulated vehicle values.
+- **Live Request and Response Logs**  
+  Displays RX and TX traffic with pause, clear, auto-scroll, and export controls.
 
-- **Developer Friendly**  
-  Designed for testing, debugging, and future protocol expansion.
+- **Qt/QML Desktop Interface**  
+  Provides dedicated pages for connection management, vehicle parameter control, logs, and delay configuration.
+
+- **Modular Architecture**  
+  Separates transport, command handling, request routing, formatting, ECU state, and UI logic for easier future expansion.
+
+## UI
+![UI preview](screenshots/img1.png)
+
 
 ## Built With
 
-- **C++**
-- **Qt 6**
-- **QML**
-- **Qt SerialPort**
-- **CMake**
+- **C++17** — core logic, command handling, ECU state, and transport layer
+- **Qt 6** — application framework
+- **Qt Quick / QML** — desktop user interface
+- **CMake** — project configuration and build system
 
 ## Why ELM327 Emulator?
 
@@ -67,7 +76,7 @@ Testing OBD2 applications usually requires:
 3. a stable connection;
 4. repeated manual testing.
 
-This emulator removes that dependency.
+**This emulator removes that dependency.**
 
 It gives developers a simple virtual environment where they can test how their application reacts to diagnostic commands and changing vehicle data.
 
@@ -78,7 +87,6 @@ To build the project, you need:
 - Qt 6.5 or newer;
 - CMake 3.16 or newer;
 - a C++ compiler;
-- Qt SerialPort module.
 
 ### 1. Clone the repository
 
@@ -102,73 +110,123 @@ cmake --build build
 ### 4. Run the application
 
 ```sh
-./build/appObd2-Emulator
+./build/appElm327-Emulator
 ```
 
 ## Repository Structure
 
-```sh
+## Repository Structure
+
+```text
 ELM327-Emulator/
-├── Qml/                              # QML user interface
-│   ├── Main.qml                      # Application entry point
-│   ├── MainPage.qml                  # Main page
-│   ├── Obd2Screen.qml                # OBD2 emulator screen
-│   ├── Speedometers/                 # Speed, RPM, temperature, voltage gauges
-│   └── assets/                       # Images, icons, fonts
-│
-├── Src/
-│   ├── Header/                       # Header files
-│   │   ├── SerialPortScanner.h       # Serial port scanner
-│   │   ├── SerialPortConnector.h     # Connection controller
-│   │   └── SerialPortWorker.h        # Serial transport worker
+├── qml/                                # Qt Quick user interface
+│   ├── Main.qml                        # Main window and page navigation
 │   │
-│   └── Source/                       # Source files
-│       ├── SerialPortScanner.cpp
-│       ├── SerialPortConnector.cpp
-│       └── SerialPortWorker.cpp
+│   ├── components/                     # Reusable interface components
+│   │   ├── ConnectionPanel.qml         # Connection controls
+│   │   ├── LogsPanel.qml               # RX/TX traffic viewer
+│   │   ├── ParameterCard.qml           # Editable vehicle parameter card
+│   │   ├── SidebarButton.qml           # Sidebar navigation button
+│   │   ├── SparklineGraph.qml          # Parameter history graph
+│   │   └── ToastNotification.qml       # Success and error notifications
+│   │
+│   ├── pages/                          # Application pages
+│   │   ├── OverviewPage.qml            # Status and primary vehicle data
+│   │   ├── ConnectionPage.qml          # Serial connection configuration
+│   │   ├── CardsPage.qml               # All simulated vehicle parameters
+│   │   ├── LogsPage.qml                # Full RX/TX log view
+│   │   ├── DelayPage.qml               # Response delay and jitter controls
+│   │   ├── DtcPage.qml                 # Reserved for DTC simulation
+│   │   └── SettingsPage.qml            # Reserved for application settings
+│   │
+│   └── assets/                         # Fonts, icons, images, and branding
+│       ├── fonts/
+│       ├── connectionPanel/
+│       ├── logsPanel/
+│       ├── parametersCard/
+│       └── sidebar/
 │
-├── CMakeLists.txt                    # Build configuration
-├── readme.md                         # Project documentation
-└── LICENSE                           # Project license
+├── src/
+│   ├── core/                           # ELM327 emulator core
+│   │   ├── ElmCore.cpp                 # Request processing coordinator
+│   │   ├── ElmCore.h
+│   │   ├── EcuModel.cpp                # ECU data exposed to QML
+│   │   ├── EcuModel.h
+│   │   ├── ConnectionManager.cpp       # Connection lifecycle management
+│   │   ├── ConnectionManager.h
+│   │   ├── LogManager.cpp              # RX/TX logging and export
+│   │   ├── LogManager.h
+│   │   ├── DelayManager.cpp            # Response delay and jitter settings
+│   │   ├── DelayManager.h
+│   │   │
+│   │   ├── commands/                   # ELM327 and OBD2 command handlers
+│   │   │   ├── AtCommandHandler.cpp
+│   │   │   ├── AtCommandHandler.h
+│   │   │   ├── ObdCommandHandler.cpp
+│   │   │   └── ObdCommandHandler.h
+│   │   │
+│   │   ├── pipeline/                   # Request processing pipeline
+│   │   │   ├── Preprocessor.cpp
+│   │   │   ├── Preprocessor.h
+│   │   │   ├── Router.cpp
+│   │   │   ├── Router.h
+│   │   │   ├── Formatter.cpp
+│   │   │   └── Formatter.h
+│   │   │
+│   │   ├── state/                      # ECU and ELM327 session state
+│   │   │   ├── EcuState.h
+│   │   │   └── ElmConfig.h
+│   │   │
+│   │   └── interfaces/
+│   │       └── ITransport.h            # Transport abstraction
+│   │
+│   └── io/
+│       ├── SerialTransport.cpp          # Serial-port transport
+│       └── SerialTransport.h
+│
+├── main.cpp                             # Application entry point
+├── CMakeLists.txt                       # Build and QML module configuration
+├── readme.md                            # Project documentation
+├── LICENSE                              # MIT license
+└── .gitignore
 ```
 
-## How It Works
+## How It Works?
 
-The emulator receives ELM327 / OBD2 commands through a serial connection and returns simulated responses.
+The emulator receives **ELM327 / OBD2** commands through a transport interface and returns simulated responses.
+
+The current implementation uses serial communication, while the architecture allows additional transports such as TCP/Wi-Fi to be added later.
 
 Basic flow:
 
-```sh
-OBD2 App
-   ↓
-Serial Port
-   ↓
-ELM327 Emulator
-   ↓
+```text
+OBD2 Application
+        ↓
+Transport Layer
+        ↓
+ELM327 Emulator Core
+        ↓
 Simulated OBD2 Response
 ```
+## Example Commands
 
-Example commands:
-
-```sh
+```text
+0100    # Supported PIDs (01–20)
+0104    # Calculated engine load
+0105    # Coolant temperature
 010C    # Engine RPM
 010D    # Vehicle speed
-0105    # Coolant temperature
-ATRV    # Battery voltage
-ATZ     # Reset
-```
+0111    # Throttle position
 
+ATRV    # Battery voltage
+ATZ     # Reset the ELM327 session
+```
 ## Roadmap
 
-- Separate ELM327 protocol logic from serial transport;
-- Add transport-independent emulator core;
-- Improve command parser with buffered input support;
-- Add ELM327 session state;
-- Add response formatter;
-- Add PID handler registry;
-- Add golden tests for stable protocol behavior.
+The full project roadmap is available in [ROADMAP.md](ROADMAP.md).
 
-## Contributing
+
+## Contributing ❤️
 
 Contributions are welcome.
 
@@ -178,19 +236,19 @@ If you want to improve the emulator:
 2. Create a new branch.
 
 ```sh
-git checkout -b feature/my-feature
+git checkout -b feature/my-amazing-elm-feature
 ```
 
 3. Commit your changes.
 
 ```sh
-git commit -m "Add my feature"
+git commit -m "Add my my-amazing-elm-feature"
 ```
 
 4. Push the branch.
 
 ```sh
-git push origin feature/my-feature
+git push origin feature/my-amazing-elm-feature
 ```
 
 5. Open a Pull Request.
