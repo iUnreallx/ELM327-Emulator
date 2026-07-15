@@ -87,6 +87,7 @@ Rectangle {
                     HoverHandler { id: hoverPause; cursorShape: Qt.PointingHandCursor }
                     MouseArea {
                         anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: logManager.isLogPaused = !logManager.isLogPaused
                     }
 
@@ -110,6 +111,7 @@ Rectangle {
                     spacing: 5
                     HoverHandler { id: hoverClear; cursorShape: Qt.PointingHandCursor }
                     MouseArea {
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         onClicked: logManager.clearLogs()
                     }
@@ -134,6 +136,7 @@ Rectangle {
                     spacing: 5
                     HoverHandler { id: hoverExport; cursorShape: Qt.PointingHandCursor }
                     MouseArea {
+                        cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         onClicked: exportDialog.open()
                     }
