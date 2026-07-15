@@ -47,12 +47,12 @@ Item {
             height: cardsFlow.cardHeight
             title: qsTr("Coolant Temp")
             unit: qsTr("°C")
-            iconSource: "../assets/parametersCard/temp.svg"
-            sizeVariant: 1
             minValue: -40
             maxValue: 150
             step: 1
-            value: 89
+            iconSource: "../assets/parametersCard/temp.svg"
+            value: ecuModel.coolantTemp
+            onValueChanged: ecuModel.coolantTemp = Math.round(value)
         }
 
         ParameterCard {
@@ -65,7 +65,35 @@ Item {
             minValue: 0
             maxValue: 18
             step: 0.1
-            value: 13.7
+            value: ecuModel.voltage
+            onValueChanged: ecuModel.voltage = value
         }
+
+        ParameterCard {
+            width: cardsFlow.cardWidth
+            height: cardsFlow.cardHeight
+            title: qsTr("Engine Load")
+            unit: qsTr("%")
+            iconSource: "../assets/parametersCard/engine.svg"
+            minValue: 0
+            maxValue: 100
+            step: 1
+            value: ecuModel.engineLoad
+            onValueChanged: ecuModel.engineLoad = Math.round(value)
+        }
+
+        ParameterCard {
+            width: cardsFlow.cardWidth
+            height: cardsFlow.cardHeight
+            title: qsTr("Throttle Position")
+            unit: qsTr("%")
+            iconSource: "../assets/parametersCard/engine.svg"
+            minValue: 0
+            maxValue: 100
+            step: 1
+            value: ecuModel.throttlePosition
+            onValueChanged: ecuModel.throttlePosition = Math.round(value)
+        }
+
     }
 }

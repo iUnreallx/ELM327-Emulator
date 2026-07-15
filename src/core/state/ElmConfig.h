@@ -16,5 +16,5 @@ struct ElmConfig {
     bool headersEnabled = false;   // AT Hx / AT Hx (Показывать ли адреса блоков.) / В будущем поддержка мульти эбу
 
     /// физические показатели
-    double voltage = 14.5;  // AT RV
+    double voltage = 13.7;  // AT RV
 };
