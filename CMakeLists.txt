@@ -21,68 +21,78 @@ qt_add_qml_module(Elm327-Emulator
 
     QML_FILES
         qml/Main.qml
+
         qml/components/SidebarButton.qml
-        qml/pages/OverviewPage.qml
         qml/components/SparklineGraph.qml
+        qml/components/ParameterCard.qml
+        qml/components/ConnectionPanel.qml
+        qml/components/LogsPanel.qml
+        qml/components/ToastNotification.qml
+
+        qml/pages/OverviewPage.qml
+        qml/pages/ConnectionPage.qml
+        qml/pages/CardsPage.qml
+        qml/pages/LogsPage.qml
+        qml/pages/DelayPage.qml
+        qml/pages/DtcPage.qml
+        qml/pages/SettingsPage.qml
 
     SOURCES
-
-        src/core/interfaces/ITransport.h
-        src/core/pipeline/Router.cpp
-        src/core/pipeline/Router.h
-        src/core/state/ElmConfig.h
-        src/core/state/EcuState.h
         src/core/ElmCore.cpp
         src/core/ElmCore.h
 
-        src/io/SerialTransport.cpp
-        src/io/SerialTransport.h
+        src/core/EcuModel.cpp
+        src/core/EcuModel.h
+
+        src/core/ConnectionManager.cpp
+        src/core/ConnectionManager.h
+
+        src/core/LogManager.cpp
+        src/core/LogManager.h
+
+        src/core/DelayManager.cpp
+        src/core/DelayManager.h
+
+        src/core/interfaces/ITransport.h
+
+        src/core/state/ElmConfig.h
+        src/core/state/EcuState.h
 
         src/core/commands/AtCommandHandler.cpp
         src/core/commands/AtCommandHandler.h
         src/core/commands/ObdCommandHandler.cpp
         src/core/commands/ObdCommandHandler.h
 
-        src/core/pipeline/Preprocessor.h
         src/core/pipeline/Preprocessor.cpp
+        src/core/pipeline/Preprocessor.h
+        src/core/pipeline/Router.cpp
+        src/core/pipeline/Router.h
         src/core/pipeline/Formatter.cpp
         src/core/pipeline/Formatter.h
-        src/core/EcuModel.cpp
-        src/core/EcuModel.h
 
-
+        src/io/SerialTransport.cpp
+        src/io/SerialTransport.h
 
     RESOURCES
         qml/assets/fonts/Ubuntu-Bold.ttf
         qml/assets/fonts/Ubuntu-Regular.ttf
+
+        qml/assets/sidebar/logo.png
+
         qml/assets/logsPanel/play.svg
         qml/assets/logsPanel/pause.svg
         qml/assets/logsPanel/clear.svg
         qml/assets/logsPanel/export.svg
+
+        qml/assets/connectionPanel/info.svg
+
+        qml/assets/parametersCard/engine.svg
+        qml/assets/parametersCard/speed.svg
+        qml/assets/parametersCard/temp.svg
+        qml/assets/parametersCard/voltage.svg
+
         readme.md
         .gitignore
-        QML_FILES qml/components/ParameterCard.qml
-        QML_FILES qml/components/ConnectionPanel.qml
-        SOURCES src/core/ConnectionManager.h
-        SOURCES src/core/ConnectionManager.cpp
-        QML_FILES qml/components/LogsPanel.qml
-        SOURCES src/core/LogManager.h
-        SOURCES src/core/LogManager.cpp
-        QML_FILES qml/components/ToastNotification.qml
-        qml/assets/connectionPanel/info.svg
-        SOURCES src/core/DelayManager.cpp
-        SOURCES src/core/DelayManager.h
-        RESOURCES qml/assets/parametersCard/engine.svg qml/assets/parametersCard/speed.svg qml/assets/parametersCard/temp.svg qml/assets/parametersCard/voltage.svg
-        QML_FILES qml/pages/ConnectionPage.qml
-        RESOURCES qml/assets/sidebar/logo.png
-        QML_FILES qml/pages/DelayPage.qml
-        QML_FILES qml/pages/DtcPage.qml
-        QML_FILES qml/pages/LogsPage.qml
-        QML_FILES qml/pages/SettingsPage.qml
-        QML_FILES
-        QML_FILES qml/pages/CardsPage.qml
-
-
 )
 
 set_target_properties(Elm327-Emulator PROPERTIES
