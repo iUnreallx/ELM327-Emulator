@@ -1,12 +1,12 @@
 <a id="readme"></a>
 <div align="center">
 
-![Preview](qml/assets/preview.png)
+![ELM327 Emulator](design-assets/elm-logo-3.png)
 
 ![C++](https://img.shields.io/badge/C++-17/20-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)
 ![Qt](https://img.shields.io/badge/Qt-6-41CD52?style=for-the-badge&logo=qt&logoColor=white)
 ![QML](https://img.shields.io/badge/QML-UI-41CD52?style=for-the-badge&logo=qt&logoColor=white)
-![ELM327](https://img.shields.io/badge/ELM327-Emulator-00B8FF?style=for-the-badge)
+![ELM327](https://img.shields.io/badge/ELM327-Emulator-FF9F0A?style=for-the-badge)
 ![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-22C55E?style=for-the-badge)
 ![Issues](https://img.shields.io/github/issues/iUnreallx/ELM327-Emulator?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/iUnreallx/ELM327-Emulator?style=for-the-badge)
