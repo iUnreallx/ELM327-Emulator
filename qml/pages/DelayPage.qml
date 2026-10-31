@@ -1,344 +1,397 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls.Basic
+import QtQuick.Layouts
+import "../components"
 
-Item {
+PageBase {
     id: root
 
-    component DelayCard: Rectangle {
-        id: card
+    required property var app
 
-        property string title: ""
-        property string description: ""
+    readonly property real contentW: Math.min(flick.width - Theme.pagePadding * 2, 1320 - Theme.pagePadding * 2)
+    readonly property bool wide: contentW > 1100
 
-        property int fromValue: 0
-        property int toValue: 1000
-        property int stepValue: 10
-        property int currentValue: 0
+    readonly property real atD: delayManager.atDelay
+    readonly property real obdD: delayManager.obdDelay
+    readonly property real jitD: delayManager.jitter
 
-        signal valueChangedByUser(int newValue)
+    scrollY: flick.contentY
 
-        Layout.fillWidth: true
-        Layout.minimumWidth: 220
-        Layout.preferredHeight: 180
+    ListModel { id: hist }
+    function sample() {
+        var v = Math.max(1, Math.round(obdD + (Math.random() * 2 - 1) * jitD))
+        hist.append({ v: v })
+        if (hist.count > 30) hist.remove(0)
+    }
+    function reseed() {
+        hist.clear()
+        for (var i = 0; i < 30; ++i) sample()
+    }
+    onObdDChanged: reseed()
+    onJitDChanged: reseed()
+    Component.onCompleted: reseed()
 
-        color: "#0D1520"
-        border.color: "#1E293B"
-        border.width: 1
-        radius: 12
+    Timer { interval: 900; repeat: true; running: root.visible; onTriggered: root.sample() }
+
+    Flickable {
+        id: flick
+        anchors.fill: parent
+        contentWidth: width
+        contentHeight: column.implicitHeight + 160
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        ScrollBar.vertical: ThemedScrollBar {}
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: 18
-            spacing: 10
+            id: column
+            x: (flick.width - width) / 2
+            y: 20
+            width: root.contentW
+            spacing: Theme.gap
 
-            RowLayout {
+            PageHeader {
+                Layout.topMargin: 14
+                Layout.bottomMargin: 6
+                scroll: flick.contentY
+                title: qsTr("Response delay")
+                subtitle: qsTr("Make the adapter fast, slow or unreliable")
+            }
+
+            // ── профили: компактная строка ──
+            Flow {
                 Layout.fillWidth: true
+                spacing: 12
+                Repeater {
+                    model: ParamDefs.profileOrder
+                    delegate: Rectangle {
+                        id: prof
+                        readonly property var p: ParamDefs.profiles[modelData]
+                        readonly property bool active: (root.atD + root.obdD + root.jitD) >= 0 && root.app.presetActive(p)
+                        width: pr.width + 32
+                        height: 58
+                        radius: 18
+                        color: active ? Theme.accent : Theme.surface
+                        border.width: active ? 0 : 1
+                        border.color: Theme.hairline
+                        y: pm.containsMouse && !pm.pressed ? -2 : 0
+                        scale: pm.pressed ? 0.95 : 1
+                        Behavior on color { ColorAnimation { duration: 250 } }
+                        Behavior on y { NumberAnimation { duration: 350; easing.type: Easing.OutBack; easing.overshoot: 1.6 } }
+                        Behavior on scale { NumberAnimation { duration: 350; easing.type: Easing.OutBack; easing.overshoot: 1.56 } }
 
-                ColumnLayout {
+                        Row {
+                            id: pr
+                            x: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 12
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 34; height: 34; radius: 11
+                                color: prof.active ? "#38ffffff" : Theme.fill
+                                Icon {
+                                    anchors.centerIn: parent
+                                    name: ParamDefs.profileIcons[modelData]
+                                    size: 18
+                                    color: prof.active ? Theme.accentFg : Theme.label
+                                    rotation: prof.active ? -6 : 0
+                                    scale: prof.active ? 1.08 : 1
+                                    Behavior on rotation { NumberAnimation { duration: 500; easing.type: Easing.OutBack; easing.overshoot: 1.6 } }
+                                    Behavior on scale { NumberAnimation { duration: 500; easing.type: Easing.OutBack; easing.overshoot: 1.6 } }
+                                }
+                            }
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                Text {
+                                    text: modelData
+                                    color: prof.active ? Theme.accentFg : Theme.label
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: 15
+                                    font.weight: Font.Bold
+                                }
+                                Text {
+                                    text: prof.p.atDelay + " · " + prof.p.obdDelay + " · ±" + prof.p.jitter + " ms"
+                                    color: prof.active ? Theme.accentFg : Theme.label2
+                                    opacity: prof.active ? 0.8 : 1
+                                    font.family: Theme.monoFamily
+                                    font.pixelSize: 12
+                                }
+                            }
+                        }
+                        MouseArea {
+                            id: pm
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.app.applyProfile(modelData)
+                        }
+                    }
+                }
+            }
+
+            GridLayout {
+                Layout.fillWidth: true
+                columns: root.wide ? 2 : 1
+                columnSpacing: Theme.gap
+                rowSpacing: Theme.gap
+
+                // ── ползунки ──
+                Panel {
                     Layout.fillWidth: true
-                    spacing: 3
+                    Layout.preferredWidth: 0
+                    Layout.horizontalStretchFactor: 7
+                    Layout.alignment: Qt.AlignTop
+                    pop: 1
 
-                    Text {
-                        text: card.title
-                        color: "#F8FAFC"
+                    Repeater {
+                        model: ["at", "obd", "jit"]
+                        delegate: ColumnLayout {
+                            id: dr
+                            readonly property var def: ParamDefs.defs[modelData]
+                            Layout.fillWidth: true
+                            Layout.topMargin: index > 0 ? 26 : 0
+                            spacing: 6
 
-                        font.pixelSize: 16
-                        font.bold: true
+                            RowLayout {
+                                Layout.fillWidth: true
+                                ColumnLayout {
+                                    spacing: 2
+                                    Text { text: dr.def.title; color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold }
+                                    Text { text: dr.def.desc; color: Theme.label2; font.family: Theme.fontFamily; font.pixelSize: 14 }
+                                }
+                                Item { Layout.fillWidth: true }
+                                Row {
+                                    spacing: 6
+                                    Odo { anchors.bottom: parent.bottom; pixelSize: 44; value: root.app.value(modelData) }
+                                    Text { anchors.bottom: parent.bottom; anchors.bottomMargin: 8; text: "ms"; color: Theme.label2; font.family: Theme.fontFamily; font.pixelSize: 18 }
+                                }
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 12
+                                AppSlider {
+                                    Layout.fillWidth: true
+                                    from: dr.def.from
+                                    to: dr.def.to
+                                    stepSize: dr.def.step
+                                    value: root.app.value(modelData)
+                                    onMoved: root.app.setValue(modelData, value)
+                                }
+                                Stepper {
+                                    onStep: function (dir) { root.app.setValue(modelData, root.app.value(modelData) + dir * dr.def.step * 5) }
+                                }
+                            }
+                        }
                     }
 
-                    Text {
-                        Layout.fillWidth: true
-
-                        text: card.description
-                        color: "#64748B"
-
-                        font.pixelSize: 11
-                        wrapMode: Text.WordWrap
-                    }
-                }
-
-                Rectangle {
-                    Layout.preferredWidth: valueLabel.implicitWidth + 20
-                    Layout.preferredHeight: 34
-
-                    color: "#0B2535"
-                    border.color: "#164E63"
-                    border.width: 1
-                    radius: 7
-
-                    Text {
-                        id: valueLabel
-                        anchors.centerIn: parent
-
-                        text: Math.round(delaySlider.value) + " ms"
-                        color: "#38BDF8"
-
-                        font.pixelSize: 14
-                        font.bold: true
-                    }
-                }
-            }
-
-            Item {
-                Layout.fillHeight: true
-            }
-
-            Slider {
-                id: delaySlider
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: 26
-
-                from: card.fromValue
-                to: card.toValue
-                stepSize: card.stepValue
-                value: card.currentValue
-
-                snapMode: Slider.SnapAlways
-                live: true
-                focusPolicy: Qt.NoFocus
-
-                onMoved: {
-                    card.valueChangedByUser(Math.round(value))
-                }
-
-                background: Rectangle {
-                    x: delaySlider.leftPadding
-
-                    y: delaySlider.topPadding
-                       + (delaySlider.availableHeight - height) / 2
-
-                    width: delaySlider.availableWidth
-                    height: 5
-
-                    color: "#1E293B"
-                    radius: 3
-
+                    // сброс удержанием
                     Rectangle {
-                        width: delaySlider.visualPosition * parent.width
-                        height: parent.height
+                        id: hold
+                        Layout.fillWidth: true
+                        Layout.topMargin: 26
+                        Layout.preferredHeight: 50
+                        radius: Theme.rMd
+                        color: Theme.fill
+                        clip: true
+                        property real progress: 0
 
-                        color: "#38BDF8"
-                        radius: parent.radius
-                    }
-                }
-
-                handle: Rectangle {
-                    x: delaySlider.leftPadding
-                       + delaySlider.visualPosition
-                       * (delaySlider.availableWidth - width)
-
-                    y: delaySlider.topPadding
-                       + (delaySlider.availableHeight - height) / 2
-
-                    implicitWidth: 18
-                    implicitHeight: 18
-
-                    color: delaySlider.pressed
-                           ? "#FFFFFF"
-                           : "#38BDF8"
-
-                    border.color: "#070E16"
-                    border.width: 2
-                    radius: 9
-
-                    scale: delaySlider.pressed ? 1.15 : 1.0
-
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: 100
+                        Rectangle {
+                            height: parent.height
+                            width: parent.width * hold.progress
+                            color: Theme.tint(Theme.red, 0.28)
+                        }
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 8
+                            Icon { anchors.verticalCenter: parent.verticalCenter; name: "reset"; size: 16; color: Theme.red }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: qsTr("Hold to reset to default")
+                                color: Theme.red
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 15
+                                font.weight: Font.DemiBold
+                            }
+                        }
+                        NumberAnimation { id: holdAnim; target: hold; property: "progress"; from: 0; to: 1; duration: 1300 }
+                        NumberAnimation { id: holdBack; target: hold; property: "progress"; to: 0; duration: 350 }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onPressed: { holdBack.stop(); holdAnim.restart() }
+                            onReleased: { if (hold.progress < 1) { holdAnim.stop(); holdBack.restart() } }
+                            onCanceled: { holdAnim.stop(); holdBack.restart() }
+                        }
+                        onProgressChanged: {
+                            if (progress >= 1) {
+                                holdAnim.stop()
+                                root.app.applyPreset(ParamDefs.profiles.Default)
+                                root.app.island(qsTr("Reset"), qsTr("Back to 500 / 50 / 0 ms"), "green", "reset")
+                                holdBack.restart()
+                            }
                         }
                     }
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 100
-                        }
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                Text {
-                    text: card.fromValue + " ms"
-                    color: "#475569"
-                    font.pixelSize: 10
                 }
 
-                Item {
+                // ── эффективная задержка ──
+                Panel {
                     Layout.fillWidth: true
-                }
+                    Layout.preferredWidth: 0
+                    Layout.horizontalStretchFactor: 5
+                    Layout.alignment: Qt.AlignTop
+                    pop: 2
 
-                Text {
-                    text: card.toValue + " ms"
-                    color: "#475569"
-                    font.pixelSize: 10
-                }
-            }
-        }
-    }
-
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 24
-        spacing: 20
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 3
-
-                Text {
-                    text: qsTr("Response Delay")
-                    color: "#F8FAFC"
-
-                    font.pixelSize: 25
-                    font.bold: true
-                }
-
-                Text {
-                    text: qsTr("Configure emulator response timing")
-                    color: "#64748B"
-                    font.pixelSize: 13
-                }
-            }  Item {
-                Layout.fillWidth: true
-            }
-
-
-            Rectangle {
-                id: resetButton
-
-                Layout.preferredWidth: 120
-                Layout.preferredHeight: 36
-                Layout.alignment: Qt.AlignRight
-
-                color: resetMouseArea.pressed
-                       ? "#1E293B"
-                       : resetMouseArea.containsMouse
-                         ? "#16202D"
-                         : "#0D1520"
-
-                border.color: resetMouseArea.containsMouse
-                              ? "#38BDF8"
-                              : "#334155"
-
-                border.width: 1
-                radius: 7
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 120
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text { text: qsTr("Effective latency"); color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold }
+                        Text { text: qsTr("What a client feels per request"); color: Theme.label2; font.family: Theme.fontFamily; font.pixelSize: 14 }
                     }
-                }
 
-                Behavior on border.color {
-                    ColorAnimation {
-                        duration: 120
+                    Repeater {
+                        model: [
+                            { name: qsTr("AT command"), base: root.atD },
+                            { name: qsTr("PID request"), base: root.obdD }
+                        ]
+                        delegate: ColumnLayout {
+                            id: lat
+                            readonly property real endPct: Math.max(0, Math.min(1, modelData.base / 3000))
+                            Layout.fillWidth: true
+                            Layout.topMargin: 18
+                            spacing: 10
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text { text: modelData.name; color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 15 }
+                                Item { Layout.fillWidth: true }
+                                Text {
+                                    text: Math.max(0, modelData.base - root.jitD) + "–" + (modelData.base + root.jitD) + " ms"
+                                    color: Theme.label
+                                    font.family: Theme.monoFamily
+                                    font.pixelSize: 14
+                                }
+                            }
+                            Rectangle {
+                                id: track
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 16
+                                radius: 8
+                                color: Theme.fill
+                                Rectangle {
+                                    height: parent.height
+                                    width: parent.width * lat.endPct
+                                    radius: 8
+                                    color: Theme.accent
+                                    Behavior on width { NumberAnimation { duration: 600; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                                }
+                                Rectangle { // диапазон джиттера
+                                    y: -4
+                                    height: parent.height + 8
+                                    radius: 6
+                                    color: Theme.label
+                                    opacity: 0.85
+                                    x: parent.width * Math.max(0, (modelData.base - root.jitD) / 3000)
+                                    width: Math.max(3, parent.width * Math.min(1, (modelData.base + root.jitD) / 3000) - x)
+                                    Behavior on x { NumberAnimation { duration: 600; easing.type: Easing.OutBack } }
+                                    Behavior on width { NumberAnimation { duration: 600; easing.type: Easing.OutBack } }
+                                }
+                                Rectangle { // летящий «пакет»
+                                    id: pkt
+                                    width: 12; height: 12; radius: 6
+                                    y: 2
+                                    x: -6
+                                    color: "white"
+                                    opacity: 0
+                                    border.width: 3
+                                    border.color: Theme.tint(Theme.accent, 0.45)
+                                    SequentialAnimation {
+                                        id: fly
+                                        running: root.visible
+                                        loops: Animation.Infinite
+                                        PauseAnimation { duration: 400 }
+                                        ParallelAnimation {
+                                            NumberAnimation { target: pkt; property: "x"; from: -6; to: track.width * lat.endPct - 6; duration: 700 + lat.endPct * 1200; easing.type: Easing.OutCubic }
+                                            SequentialAnimation {
+                                                NumberAnimation { target: pkt; property: "opacity"; to: 1; duration: 80 }
+                                                PauseAnimation { duration: 600 + lat.endPct * 1200 }
+                                                NumberAnimation { target: pkt; property: "opacity"; to: 0; duration: 220 }
+                                            }
+                                        }
+                                        PauseAnimation { duration: 1500 }
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
 
-                Text {
-                    anchors.centerIn: parent
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 8
+                        Repeater {
+                            model: ["0", "1 s", "2 s", "3 s"]
+                            delegate: Text {
+                                Layout.fillWidth: true
+                                horizontalAlignment: index === 0 ? Text.AlignLeft : (index === 3 ? Text.AlignRight : Text.AlignHCenter)
+                                text: modelData
+                                color: Theme.label3
+                                font.family: Theme.monoFamily
+                                font.pixelSize: 12
+                            }
+                        }
+                    }
 
-                    text: qsTr("RESET")
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 26
+                        Layout.bottomMargin: 8
+                        Text { text: qsTr("Last 30 PID replies"); color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 15; font.weight: Font.DemiBold }
+                        Item { Layout.fillWidth: true }
+                        Text {
+                            id: avg
+                            property real total: 0
+                            text: qsTr("avg %1 ms").arg(Math.round(total))
+                            color: Theme.label2
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 14
+                            Connections {
+                                target: hist
+                                function onCountChanged() { avg.recalc() }
+                            }
+                            function recalc() {
+                                var t = 0
+                                for (var i = 0; i < hist.count; ++i) t += hist.get(i).v
+                                total = hist.count ? t / hist.count : 0
+                            }
+                            Component.onCompleted: recalc()
+                        }
+                    }
 
-                    color: resetMouseArea.containsMouse
-                           ? "#FFFFFF"
-                           : "#94A3B8"
-
-                    font.pixelSize: 11
-                    font.bold: true
-                    font.letterSpacing: 1
-
-                    Behavior on color {
-                        ColorAnimation {
-                            duration: 120
+                    Row {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 84
+                        spacing: 3
+                        readonly property real mx: {
+                            var m = Math.max(200, root.obdD + root.jitD)
+                            for (var i = 0; i < hist.count; ++i) m = Math.max(m, hist.get(i).v)
+                            return m
+                        }
+                        Repeater {
+                            model: hist
+                            delegate: Item {
+                                width: (parent.width - 29 * 3) / 30
+                                height: parent.height
+                                Rectangle {
+                                    anchors.bottom: parent.bottom
+                                    width: parent.width
+                                    height: Math.max(4, parent.height * model.v / parent.parent.mx)
+                                    radius: 3
+                                    color: index === hist.count - 1 ? Theme.accent : Theme.tint(Theme.accent, 0.75)
+                                    Behavior on height { NumberAnimation { duration: 500; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
+                                }
+                            }
                         }
                     }
                 }
-
-                MouseArea {
-                    id: resetMouseArea
-
-                    anchors.fill: parent
-
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        globalToast.show("Параметры восстановлены", false);
-                        delayManager.atDelay = 500
-                        delayManager.obdDelay = 50
-                        delayManager.jitter = 0
-                    }
-                }
             }
-        }
-
-        GridLayout {
-            Layout.fillWidth: true
-
-            columns: width >= 760 ? 3
-                                 : width >= 500 ? 2
-                                                : 1
-
-            columnSpacing: 14
-            rowSpacing: 14
-
-            DelayCard {
-                title: qsTr("AT Commands")
-                description: qsTr("Delay for ATZ, ATE0, ATRV and other AT commands")
-
-                fromValue: 0
-                toValue: 2000
-                stepValue: 10
-
-                currentValue: delayManager.atDelay
-
-                onValueChangedByUser: function(newValue) {
-                    delayManager.atDelay = newValue
-                }
-            }
-
-            DelayCard {
-                title: qsTr("OBD2 Requests")
-                description: qsTr("Delay for RPM, speed and other PID responses")
-
-                fromValue: 0
-                toValue: 1000
-                stepValue: 10
-
-                currentValue: delayManager.obdDelay
-
-                onValueChangedByUser: function(newValue) {
-                    delayManager.obdDelay = newValue
-                }
-            }
-
-            DelayCard {
-                title: qsTr("Random Jitter")
-                description: qsTr("Random variation added to response delay")
-
-                fromValue: 0
-                toValue: 500
-                stepValue: 5
-
-                currentValue: delayManager.jitter
-
-                onValueChangedByUser: function(newValue) {
-                    delayManager.jitter = newValue
-                }
-            }
-        }
-
-        Item {
-            Layout.fillHeight: true
         }
     }
 }
