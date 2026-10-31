@@ -57,7 +57,13 @@ The project is useful for:
   Separates transport, command handling, request routing, formatting, ECU state, and UI logic for easier future expansion.
 
 ## UI
-![UI preview](screenshots/img1.png)
+![Overview](screenshots/overview.png)
+
+| Connection | Parameters |
+|---|---|
+| ![Connection](screenshots/connection.png) | ![Parameters](screenshots/parameters.png) |
+
+![AT commands](screenshots/at-commands.png)
 
 
 ## Built With
