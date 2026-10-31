@@ -1,0 +1,39 @@
+module components
+singleton Theme 1.0 Theme.qml
+singleton ParamDefs 1.0 ParamDefs.qml
+AppButton 1.0 AppButton.qml
+AppearancePopup 1.0 AppearancePopup.qml
+Badge 1.0 Badge.qml
+Caption 1.0 Caption.qml
+Cell 1.0 Cell.qml
+ConfirmAlert 1.0 ConfirmAlert.qml
+Dock 1.0 Dock.qml
+EditSheet 1.0 EditSheet.qml
+Gauge 1.0 Gauge.qml
+Group 1.0 Group.qml
+Icon 1.0 Icon.qml
+IosSwitch 1.0 IosSwitch.qml
+Island 1.0 Island.qml
+LogView 1.0 LogView.qml
+PageBase 1.0 PageBase.qml
+PageHeader 1.0 PageHeader.qml
+Panel 1.0 Panel.qml
+ParamControl 1.0 ParamControl.qml
+PortSheet 1.0 PortSheet.qml
+RoundButton 1.0 RoundButton.qml
+SearchField 1.0 SearchField.qml
+Segmented 1.0 Segmented.qml
+StatCard 1.0 StatCard.qml
+StatusIcon 1.0 StatusIcon.qml
+Stepper 1.0 Stepper.qml
+ThemedScrollBar 1.0 ThemedScrollBar.qml
+AppSlider 1.0 AppSlider.qml
+CommandPalette 1.0 CommandPalette.qml
+Confetti 1.0 Confetti.qml
+FloatField 1.0 FloatField.qml
+MiniChip 1.0 MiniChip.qml
+Odo 1.0 Odo.qml
+ScenarioChip 1.0 ScenarioChip.qml
+SlideConfirm 1.0 SlideConfirm.qml
+ToastStack 1.0 ToastStack.qml
+VerticalTile 1.0 VerticalTile.qml
