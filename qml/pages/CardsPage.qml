@@ -1,99 +1,140 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls.Basic
+import QtQuick.Layouts
 import "../components"
 
-Item {
-    id: gridRoot
+PageBase {
+    id: root
 
-    Flow {
-        id: cardsFlow
+    required property var app
+
+    readonly property real contentW: Math.min(flick.width - Theme.pagePadding * 2, 1320 - Theme.pagePadding * 2)
+    readonly property int tileCols: contentW > 1100 ? 6 : (contentW > 640 ? 3 : 2)
+
+    scrollY: flick.contentY
+
+    Flickable {
+        id: flick
         anchors.fill: parent
-        anchors.margins: 12
-        spacing: 12
-        flow: Flow.LeftToRight
-        property real cardWidth: Math.max(180, (width - (spacing * 3)) / 4)
-        property real cardHeight: 150
+        contentWidth: width
+        contentHeight: column.implicitHeight + 160
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        ScrollBar.vertical: ThemedScrollBar {}
 
-        ParameterCard {
-            width: cardsFlow.cardWidth
-            height: cardsFlow.cardHeight
-            title: qsTr("Vehicle Speed")
-            unit: qsTr("km/h")
-            iconSource: "../assets/parametersCard/speed.svg"
-            minValue: 0
-            maxValue: 255
-            step: 1
-            value: ecuModel.speed
-            onValueChanged: ecuModel.speed = value
+        ColumnLayout {
+            id: column
+            x: (flick.width - width) / 2
+            y: 20
+            width: root.contentW
+            spacing: Theme.gap
+
+            PageHeader {
+                Layout.topMargin: 14
+                Layout.bottomMargin: 6
+                scroll: flick.contentY
+                title: qsTr("Parameters")
+                subtitle: qsTr("Drag a tile to change a value, tap the number to type")
+            }
+
+            Panel {
+                Layout.fillWidth: true
+                pop: 0
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+                    Text { text: qsTr("Scenario"); color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold }
+                    Text { text: qsTr("Start from a preset, then fine-tune below"); color: Theme.label2; font.family: Theme.fontFamily; font.pixelSize: 14 }
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 14
+                    spacing: 10
+                    Repeater {
+                        model: ParamDefs.scenarioOrder
+                        delegate: ScenarioChip {
+                            text: modelData
+                            iconName: ParamDefs.scenarioIcons[modelData]
+                            active: root.app.scenario === modelData
+                            onClicked: root.app.applyScenario(modelData)
+                        }
+                    }
+                }
+            }
+
+            GridLayout {
+                Layout.fillWidth: true
+                columns: root.tileCols
+                columnSpacing: 14
+                rowSpacing: 14
+
+                Repeater {
+                    model: ParamDefs.order
+                    delegate: VerticalTile {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        app: root.app
+                        key: modelData
+                        pop: index + 1
+                    }
+                }
+            }
+
+            Panel {
+                Layout.fillWidth: true
+                pop: 8
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.bottomMargin: 14
+                    spacing: 2
+                    Text { text: qsTr("Live response"); color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold }
+                    Text { text: qsTr("What a client receives for each PID right now"); color: Theme.label2; font.family: Theme.fontFamily; font.pixelSize: 14 }
+                }
+                Group {
+                    Layout.fillWidth: true
+                    Repeater {
+                        model: ParamDefs.order
+                        delegate: Item {
+                            readonly property var def: ParamDefs.defs[modelData]
+                            Layout.fillWidth: true
+                            implicitHeight: 46
+                            Rectangle { visible: index > 0; x: 16; width: parent.width - 16; height: 1; color: Theme.separator; opacity: 0.6 }
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 16
+                                anchors.rightMargin: 16
+                                spacing: 12
+                                Rectangle {
+                                    Layout.preferredWidth: 28
+                                    Layout.preferredHeight: 28
+                                    radius: 8
+                                    color: Theme[def.tone]
+                                    Icon { anchors.centerIn: parent; name: def.icon; size: 15; color: "white" }
+                                }
+                                Text {
+                                    text: def.title
+                                    color: Theme.label
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: 16
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: def.pid
+                                    color: Theme.label2
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: 13
+                                }
+                                Text {
+                                    text: ParamDefs.response(modelData, root.app.value(modelData))
+                                    color: Theme.label
+                                    font.family: Theme.monoFamily
+                                    font.pixelSize: 15
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-
-        ParameterCard {
-            width: cardsFlow.cardWidth
-            height: cardsFlow.cardHeight
-            title: qsTr("Engine RPM")
-            unit: qsTr("rpm")
-            iconSource: "../assets/parametersCard/engine.svg"
-            minValue: 0
-            sizeVariant: 1
-            maxValue: 15000
-            step: 50
-            value: ecuModel.rpm
-            onValueChanged: ecuModel.rpm = value
-        }
-
-        ParameterCard {
-            width: cardsFlow.cardWidth
-            height: cardsFlow.cardHeight
-            title: qsTr("Coolant Temp")
-            unit: qsTr("°C")
-            minValue: -40
-            maxValue: 150
-            step: 1
-            iconSource: "../assets/parametersCard/temp.svg"
-            value: ecuModel.coolantTemp
-            onValueChanged: ecuModel.coolantTemp = Math.round(value)
-        }
-
-        ParameterCard {
-            width: cardsFlow.cardWidth
-            height: cardsFlow.cardHeight
-            title: qsTr("Battery Voltage")
-            unit: qsTr("V")
-            sizeVariant: 2
-            iconSource: "../assets/parametersCard/voltage.svg"
-            minValue: 0
-            maxValue: 18
-            step: 0.1
-            value: ecuModel.voltage
-            onValueChanged: ecuModel.voltage = value
-        }
-
-        ParameterCard {
-            width: cardsFlow.cardWidth
-            height: cardsFlow.cardHeight
-            title: qsTr("Engine Load")
-            unit: qsTr("%")
-            iconSource: "../assets/parametersCard/engine.svg"
-            minValue: 0
-            maxValue: 100
-            step: 1
-            value: ecuModel.engineLoad
-            onValueChanged: ecuModel.engineLoad = Math.round(value)
-        }
-
-        ParameterCard {
-            width: cardsFlow.cardWidth
-            height: cardsFlow.cardHeight
-            title: qsTr("Throttle Position")
-            unit: qsTr("%")
-            iconSource: "../assets/parametersCard/engine.svg"
-            minValue: 0
-            maxValue: 100
-            step: 1
-            value: ecuModel.throttlePosition
-            onValueChanged: ecuModel.throttlePosition = Math.round(value)
-        }
-
     }
 }

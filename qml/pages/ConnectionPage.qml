@@ -1,451 +1,311 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls.Basic
+import QtQuick.Layouts
+import "../components"
 
-Rectangle {
+PageBase {
     id: root
 
-    // 0 - WIFI, 1 - Bluetooth, 2 - USB
-    property int activeMode: 0
+    required property var app
+    readonly property bool locked: app.connected
 
-    property bool isConnected: connManager.isConnected
-    property string statusText: isConnected ? qsTr("Emulator is ready.")
-                                            : qsTr("Waiting for connection...")
+    readonly property real contentW: Math.min(flick.width - Theme.pagePadding * 2, 1320 - Theme.pagePadding * 2)
+    readonly property bool wide: contentW > 1100
 
-    Layout.fillWidth: true
-    Layout.preferredHeight: 180
-    color: "#0B1120"
-    border.color: "#1E293B"
-    border.width: 1
-    radius: 12
-    clip: true
+    scrollY: flick.contentY
 
-    ColumnLayout {
+    Flickable {
+        id: flick
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 15
+        contentWidth: width
+        contentHeight: column.implicitHeight + 160
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
+        ScrollBar.vertical: ThemedScrollBar {}
 
-        Text {
-            text: qsTr("CONNECTION")
-            color: "#94A3B8"
-            font.pixelSize: 12
-            font.bold: true
-            font.letterSpacing: 2
-        }
+        ColumnLayout {
+            id: column
+            x: (flick.width - width) / 2
+            y: 20
+            width: root.contentW
+            spacing: Theme.gap
 
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            /// правая часть ( выбор ком порта или ip )
-            RowLayout {
-                id: rightPanel
-                anchors.right: parent.right
-                anchors.top: parent.top
-                spacing: 30
-
-                Rectangle {
-                    Layout.preferredWidth: 1
-                    Layout.fillHeight: true
-                    color: "#1E293B"
-                }
-
-                ColumnLayout {
-                    Layout.alignment: Qt.AlignTop
-                    spacing: 20
-
-                    StackLayout {
-                        currentIndex: activeMode === 0 ? 0 : 1
-
-                        RowLayout {
-                            spacing: 40
-
-                            ColumnLayout {
-                                Text { text: qsTr("IP ADDRESS"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
-                                TextField {
-                                    id: ipField
-                                    text: "192.168.1.50"
-                                    color: "white"
-                                    font.pixelSize: 14
-                                    verticalAlignment: TextInput.AlignVCenter
-
-                                    validator: RegularExpressionValidator {
-                                        /// Отбрасывает буквы + цифры более одного байта - 255
-                                        regularExpression: /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){0,3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)?$/
-                                    }
-                                    onTextEdited: {
-                                        let parts = text.split('.');
-                                        let lastPart = parts[parts.length - 1];
-                                        if (lastPart.length === 3 && parts.length < 4) {
-                                            text = text + ".";
-                                            cursorPosition = text.length;
-                                        }
-                                    }
-                                    background: Rectangle {
-                                        color: "#1E293B"
-                                        radius: 4
-                                        implicitHeight: 30
-                                        implicitWidth: 150
-                                    }
-                                }
-                            }
-
-                            ColumnLayout {
-                                Text { text: qsTr("PORT"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
-                                TextField {
-                                    id: portField
-                                    text: "35000"
-                                    color: "white"
-                                    verticalAlignment: TextInput.AlignVCenter
-                                    font.pixelSize: 14
-                                    maximumLength: 5
-                                    validator: IntValidator {
-                                        bottom: 1
-                                        top: 65535
-                                    }
-                                    background: Rectangle { color: "#1E293B"; radius: 4; implicitHeight: 30; implicitWidth: 100 }
-                                }
-                            }
-                        }
-
-                        /// управление com портами
-                        RowLayout {
-                            ColumnLayout {
-                                Text { text: qsTr("COM PORT"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
-
-                                ComboBox {
-                                    id: comField
-                                    editable: true
-                                    model: []
-
-                                    onDownChanged: {
-                                        if (down) {
-                                            comField.model = connManager.getAvailablePorts();
-                                        }
-                                    }
-
-                                    Component.onCompleted: {
-                                        editText = "COM6"
-                                    }
-
-                                    background: Rectangle {
-                                        color: "#1E293B"
-                                        radius: 4
-                                        implicitHeight: 30
-                                        implicitWidth: 290
-                                    }
-
-                                    contentItem: Item {
-                                        TextInput {
-                                            anchors.left: parent.left
-                                            anchors.top: parent.top
-                                            anchors.bottom: parent.bottom
-                                            anchors.right: parent.right
-                                            anchors.rightMargin: 40
-                                            anchors.leftMargin: 5
-                                            verticalAlignment: Text.AlignVCenter
-                                            text: comField.editText
-                                            color: "white"
-                                            font.pixelSize: 14
-                                            selectionColor: "#38BDF8"
-                                            selectedTextColor: "#0B1120"
-                                            selectByMouse: true
-                                            autoScroll: true
-                                            onTextEdited: comField.editText = text
-                                        }
-                                    }
-
-                                    indicator: Text {
-                                        x: comField.width - width - 15
-                                        y: comField.topPadding + (comField.availableHeight - height) / 2
-                                        text: "▼"
-                                        color: comField.popup.opened ? "#38BDF8" : "#94A3B8"
-                                        font.pixelSize: 12
-                                        verticalAlignment: Text.AlignVCenter
-                                    }
-
-                                    delegate: ItemDelegate {
-                                        width: comField.width
-                                        contentItem: Text {
-                                            text: modelData
-                                            color: "white"
-                                            font.pixelSize: 14
-                                            verticalAlignment: Text.AlignVCenter
-                                        }
-                                        background: Rectangle {
-                                            color: hovered ? "#2D3748" : "#1E293B"
-                                        }
-                                    }
-
-                                    popup: Popup {
-                                        y: comField.height - 1
-                                        width: comField.width
-                                        implicitHeight: contentItem.implicitHeight
-                                        padding: 1
-                                        contentItem: ListView {
-                                            clip: true
-                                            implicitHeight: contentHeight
-                                            model: comField.popup.visible ? comField.delegateModel : null
-                                            currentIndex: comField.highlightedIndex
-                                        }
-                                        background: Rectangle {
-                                            color: "#1E293B"
-                                            border.color: "#0B1120"
-                                            radius: 4
-                                        }
-                                    }
-
-                                    MouseArea {
-                                        anchors.right: parent.right
-                                        anchors.top: parent.top
-                                        anchors.bottom: parent.bottom
-                                        width: 40
-                                        z: 99
-
-                                        cursorShape: Qt.PointingHandCursor
-                                        acceptedButtons: Qt.NoButton
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: 40
-
-                        ColumnLayout {
-                            Text { text: qsTr("PROTOCOL"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
-                            Text { text: "ISO 15765-4 (CAN 11/500)"; color: "white"; font.pixelSize: 14 }
-                        }
-
-                        ColumnLayout {
-                            Text { text: qsTr("ADAPTER"); color: "#64748B"; font.pixelSize: 10; font.bold: true }
-                            Text { text: "ELM327 v1.5"; color: "white"; font.pixelSize: 14 }
-                        }
-                    }
-                }
+            PageHeader {
+                Layout.topMargin: 14
+                Layout.bottomMargin: 6
+                scroll: flick.contentY
+                title: qsTr("Connection")
+                subtitle: qsTr("Choose how clients reach the emulator")
             }
 
-            /// выбор типа подключения
-            ColumnLayout {
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.right: rightPanel.left
-                anchors.rightMargin: 40
-                spacing: 5
+            GridLayout {
+                Layout.fillWidth: true
+                columns: root.wide ? 2 : 1
+                columnSpacing: Theme.gap
+                rowSpacing: Theme.gap
 
-                Rectangle {
+                // ── транспорт ──
+                Panel {
                     Layout.fillWidth: true
-                    height: 36
-                    color: "transparent"
-                    border.color: "#1E293B"
-                    radius: 6
+                    Layout.preferredWidth: 0
+                    Layout.horizontalStretchFactor: 7
+                    Layout.alignment: Qt.AlignTop
+                    pop: 0
 
                     RowLayout {
-                        anchors.fill: parent
-                        spacing: 0
-
-                        /// wifi
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            color: activeMode === 0 ? "#1E293B" : "transparent"
-                            radius: 6
-
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 18
+                        spacing: 16
+                        StatusIcon { on: root.app.connected; tile: 60; iconName: root.app.modeIcons[root.app.connMode] }
+                        ColumnLayout {
+                            spacing: 1
                             Text {
-                                anchors.centerIn: parent
-                                text: "Wi-Fi"
-                                color: activeMode === 0 ? "#38BDF8" : "#94A3B8"
-                                font.bold: activeMode === 0
+                                text: root.app.connected ? qsTr("Server is live") : qsTr("Server stopped")
+                                color: Theme.label
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 22
+                                font.weight: Font.Bold
+                                font.letterSpacing: -0.6
                             }
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: activeMode = 0
-                                cursorShape: Qt.PointingHandCursor
+                            Text {
+                                text: (root.app.connected ? qsTr("Listening on ") : qsTr("Will listen on ")) + root.app.endpoint
+                                color: Theme.label2
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 14
                             }
                         }
+                    }
 
-                        /// Bluetooth
+                    Segmented {
+                        Layout.fillWidth: true
+                        block: true
+                        large: true
+                        model: [
+                            { text: "Wi-Fi", icon: "wifi" },
+                            { text: "Bluetooth", icon: "bt" },
+                            { text: "USB / COM", icon: "plug" }
+                        ]
+                        currentIndex: root.app.connMode
+                        onPicked: function (i) {
+                            if (root.locked) {
+                                root.app.toast(qsTr("Stop the server first"), qsTr("Connection type can only change while stopped"), "red", "x")
+                                return
+                            }
+                            root.app.connMode = i
+                            if (i !== 0) root.app.refreshPorts()
+                        }
+                    }
+
+                    // Wi-Fi: IP + порт
+                    RowLayout {
+                        visible: root.app.connMode === 0
+                        Layout.fillWidth: true
+                        Layout.topMargin: 18
+                        spacing: 12
+                        FloatField {
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 2
+                            label: qsTr("IP address")
+                            text: root.app.ip
+                            locked: root.locked
+                            onEdited: function (t) { root.app.ip = t }
+                        }
+                        FloatField {
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            label: qsTr("Port")
+                            text: root.app.port
+                            locked: root.locked
+                            hints: Qt.ImhDigitsOnly
+                            onEdited: function (t) { root.app.port = t }
+                        }
+                    }
+
+                    // Bluetooth / USB: COM-порт
+                    RowLayout {
+                        visible: root.app.connMode !== 0
+                        Layout.fillWidth: true
+                        Layout.topMargin: 18
+                        spacing: 12
+
                         Rectangle {
                             Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            color: activeMode === 1 ? "#1E293B" : "transparent"
-                            radius: 6
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "Bluetooth"
-                                color: activeMode === 1 ? "#38BDF8" : "#94A3B8"
-                                font.bold: activeMode === 1
+                            Layout.preferredHeight: 58
+                            radius: 14
+                            color: portMouse.containsMouse ? Theme.fill2 : Theme.fill
+                            opacity: root.locked ? 0.5 : 1
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Column {
+                                x: 16
+                                anchors.verticalCenter: parent.verticalCenter
+                                Text {
+                                    text: root.app.connMode === 1 ? qsTr("Bluetooth port") : qsTr("COM port")
+                                    color: Theme.label2
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: 12
+                                }
+                                Text {
+                                    text: root.app.com !== "" ? root.app.com : qsTr("None")
+                                    color: Theme.label
+                                    font.family: Theme.monoFamily
+                                    font.pixelSize: 17
+                                }
                             }
-
+                            Icon { anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter; name: "chevD"; size: 18; color: Theme.label3 }
                             MouseArea {
+                                id: portMouse
                                 anchors.fill: parent
-                                onClicked: activeMode = 1
+                                enabled: !root.locked
+                                hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
+                                onClicked: { root.app.refreshPorts(); root.app.portsRequested() }
                             }
                         }
-
-                        /// USB
-                        Rectangle {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            color: activeMode === 2 ? "#1E293B" : "transparent"
-                            radius: 6
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "USB"
-                                color: activeMode === 2 ? "#38BDF8" : "#94A3B8"
-                                font.bold: activeMode === 2
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: activeMode = 2
-                                cursorShape: Qt.PointingHandCursor
+                        RoundButton {
+                            diameter: 58
+                            iconName: "reset"
+                            onClicked: {
+                                root.app.refreshPorts()
+                                root.app.toast(qsTr("Ports refreshed"), qsTr("%1 found").arg(root.app.ports.length), "blue", "reset")
                             }
                         }
+                    }
+
+                    SlideConfirm {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 22
+                        tone: root.app.connected ? Theme.red : Theme.green
+                        iconName: root.app.connected ? "stop" : "power"
+                        text: root.app.connected ? qsTr("Slide to stop the server") : qsTr("Slide to start the server")
+                        onConfirmed: root.app.toggleConnection()
                     }
                 }
 
-                /// status & action block
+                // ── адаптер + сессия ──
                 ColumnLayout {
-                    id: statusBlock
-                    spacing: 4
                     Layout.fillWidth: true
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-                        Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: 0
+                    Layout.horizontalStretchFactor: 5
+                    Layout.alignment: Qt.AlignTop
+                    spacing: Theme.gap
 
-                        ColumnLayout {
-                            spacing: 0
-                            Layout.alignment: Qt.AlignVCenter
-
-                            RowLayout {
-                                spacing: 6
-                                Rectangle {
-                                    width: 8
-                                    height: 8
-                                    radius: 4
-                                    color: isConnected ? "#41CD52" : "#F44336"
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
-                                Text {
-                                    text: isConnected ? qsTr("Connected") : qsTr("Disconnected")
-                                    color: isConnected ? "#41CD52" : "#F44336"
-                                    font.bold: true
-                                    font.pixelSize: 13
-                                    Layout.alignment: Qt.AlignVCenter
-                                }
-                            }
-
-                            Text {
-                                text: root.statusText
-                                color: "#94A3B8"
-                                font.pixelSize: 12
-                            }
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        IconImage {
-                            id: infoIcon
-                            source: "../assets/connectionPanel/info.svg"
-                            Layout.preferredWidth: 14
-                            Layout.preferredHeight: 14
-                            sourceSize: Qt.size(14, 14)
-                            color: hoverInfo.hovered ? "#FFFFFF" : "#64748B"
-                            Layout.alignment: Qt.AlignVCenter
-
-                            Behavior on color { ColorAnimation { duration: 150 } }
-
-                            HoverHandler {
-                                id: hoverInfo
-                                cursorShape: Qt.PointingHandCursor
-                            }
-
-                            ToolTip {
-                                id: infoToolTip
-                                visible: hoverInfo.hovered
-                                delay: 300
-                                text: {
-                                    if (root.activeMode === 0) {
-                                        return qsTr("Wi-Fi (TCP): Эмулирует точку доступа. Клиент подключается по IP и порту 35000.");
-                                    } else if (root.activeMode === 1) {
-                                        return qsTr("Bluetooth: Включите bluetooth на устройстве, и выберите свободный com-port.\nПосле этого сопрягите устройство с obd2 приложением.");
-                                    } else {
-                                        return qsTr("USB (COM): Подключите кабель к устройству и выберите созданный последовательный порт.\nПрямое serial-соединение на скорости 38400 бод.");
-                                    }
-                                }
-
-                                background: Rectangle {
-                                    color: "#0F172A"
-                                    border.color: "#334155"
-                                    border.width: 1
-                                    radius: 6
-                                }
-                                contentItem: Text {
-                                    text: infoToolTip.text
-                                    color: "#E2E8F0"
-                                    font.pixelSize: 11
-                                    horizontalAlignment: Text.AlignHCenter
-                                            // Настройка межстрочного интервала (если захочется сделать еще плотнее)
-                                            // lineHeight: 1.1
-                                    font.family: "Ubuntu-Regular"
-                                }
-                            }
-                        }
-                    }
-
-                    Item {
-                        Layout.preferredHeight: 0
-                    }
-
-                    /// КНОПКА START / STOP SERVER
+                    // карточка адаптера: наклоняется за курсором
                     Rectangle {
-                        id: actionButton
+                        id: tilt
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 36
-                        radius: 6
-                        color: isConnected ? "#E11D48" : "#10B981"
+                        Layout.preferredHeight: 210
+                        radius: 24
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "#1f1f22" }
+                            GradientStop { position: 1.0; color: "#0b0b0d" }
+                        }
+                        border.width: 1
+                        border.color: "#14ffffff"
+                        antialiasing: true
 
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: 150
-                                easing.type: Easing.InOutQuad
+                        property real rx: 0
+                        property real ry: 0
+                        transform: [
+                            Rotation { origin.x: tilt.width / 2; origin.y: tilt.height / 2; axis { x: 0; y: 1; z: 0 } angle: tilt.ry },
+                            Rotation { origin.x: tilt.width / 2; origin.y: tilt.height / 2; axis { x: 1; y: 0; z: 0 } angle: tilt.rx }
+                        ]
+                        Behavior on rx { NumberAnimation { duration: 450; easing.type: Easing.OutBack } }
+                        Behavior on ry { NumberAnimation { duration: 450; easing.type: Easing.OutBack } }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onPositionChanged: function (m) {
+                                tilt.ry = (m.x / tilt.width - 0.5) * 14
+                                tilt.rx = -(m.y / tilt.height - 0.5) * 14
                             }
+                            onExited: { tilt.rx = 0; tilt.ry = 0 }
                         }
 
-                        transformOrigin: Item.Center
-                        scale: startMouseArea.pressed ? 0.96 : 1.0
-
-                        Behavior on scale {
-                            NumberAnimation {
-                                duration: 100
-                                easing.type: Easing.OutQuad
+                        Row {
+                            x: 20
+                            y: 18
+                            spacing: 8
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 9; height: 9; radius: 5
+                                color: root.app.connected ? Theme.green : "#8e8e93"
+                                border.width: root.app.connected ? 4 : 0
+                                border.color: Theme.tint(Theme.green, 0.22)
                             }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: root.app.connected ? qsTr("Connected") : qsTr("Idle")
+                                color: "white"
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 13
+                                font.weight: Font.DemiBold
+                            }
+                        }
+                        Icon { anchors.right: parent.right; anchors.rightMargin: 24; anchors.verticalCenter: parent.verticalCenter; name: "plug"; size: 92; color: "#21ffffff" }
+                        Column {
+                            x: 20
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 18
+                            Text {
+                                text: "ELM327 V1.5"
+                                color: "#99ffffff"
+                                font.family: Theme.fontFamily
+                                font.pixelSize: 12
+                                font.weight: Font.DemiBold
+                                font.letterSpacing: 0.8
+                            }
+                            Text {
+                                text: root.app.endpoint
+                                color: "white"
+                                font.family: Theme.monoFamily
+                                font.pixelSize: 24
+                                font.weight: Font.ExtraBold
+                            }
+                        }
+                    }
+
+                    Panel {
+                        Layout.fillWidth: true
+                        pop: 2
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.bottomMargin: 14
+                            Text { text: qsTr("Session"); color: Theme.label; font.family: Theme.fontFamily; font.pixelSize: 17; font.weight: Font.DemiBold }
+                            Item { Layout.fillWidth: true }
+                            AppButton {
+                                size: "sm"
+                                kind: "tinted"
+                                text: qsTr("Copy address")
+                                trailingIcon: "copy"
+                                onClicked: {
+                                    clip.text = root.app.endpoint
+                                    clip.selectAll()
+                                    clip.copy()
+                                    root.app.toast(qsTr("Address copied"), root.app.endpoint, "blue", "copy")
+                                }
+                            }
+                        }
+                        TextEdit { id: clip; visible: false }
+
+                        Group {
+                            Layout.fillWidth: true
+                            Cell { first: true; title: qsTr("Protocol"); valueText: "ISO 15765-4 (CAN)" }
+                            Cell { title: qsTr("Clients"); valueText: root.app.connected ? "1" : "0" }
+                            Cell { title: qsTr("Uptime"); valueText: root.app.formatUptime(root.app.uptime) }
                         }
 
                         Text {
-                            anchors.centerIn: parent
-                            text: isConnected ? qsTr("STOP SERVER") : qsTr("START SERVER")
-                            color: "#FFFFFF"
-                            font.bold: true
-                            font.pixelSize: 12
-                            font.letterSpacing: 1
-                        }
-
-                        MouseArea {
-                            id: startMouseArea
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                connManager.toggleConnection(activeMode, ipField.text, portField.text, comField.editText)
-                            }
+                            Layout.fillWidth: true
+                            Layout.topMargin: 12
+                            text: qsTr("Point your OBD app at the address above. The adapter answers AT commands and PIDs with the delays you set.")
+                                  + (root.locked ? "  " + qsTr("Stop the server to change these settings.") : "")
+                            color: Theme.label2
+                            font.family: Theme.fontFamily
+                            font.pixelSize: 13
+                            lineHeight: 1.15
+                            wrapMode: Text.WordWrap
                         }
                     }
                 }
